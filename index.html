@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erken Kayıt Randevu Sistemi</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --bg: #ecf0f1; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); display: flex; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background-color: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        .logo { display: block; max-width: 180px; margin: 0 auto 20px; }
+        h2 { text-align: center; color: var(--primary); margin-bottom: 30px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary); }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--accent); outline: none; }
+
+        /* ODA SEÇİMİ KARTLARI */
+        .room-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .room-card {
+            background: #fff; border: 2px solid #e0e0e0; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.3s; font-weight: bold; color: #7f8c8d;
+        }
+        .room-card:hover { border-color: var(--accent); color: var(--accent); }
+        .room-card.selected { background-color: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3); }
+
+        button#submitButton { width: 100%; padding: 16px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button#submitButton:hover:not(:disabled) { background-color: #34495e; transform: translateY(-2px); }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; transform: none; }
+
+        #statusMessage { text-align: center; margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; display: none; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--accent); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-right: 10px; vertical-align: middle; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="https://i.hizliresim.com/6eldhh1.png" alt="Okul Logosu" class="logo">
+        <h2>Erken Kayıt Randevusu</h2>
+        
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label>Veli Adı Soyadı</label>
+                <input type="text" name="veliAdiSoyadi" required placeholder="Adınız Soyadınız">
+            </div>
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label>Öğrenci Sınıfı</label>
+                    <select name="ogrenciSinifi" required>
+                        <option value="">Seçiniz</option>
+                        <option value="1. Sınıf">1. Sınıf</option>
+                        <option value="2. Sınıf">2. Sınıf</option>
+                        <option value="3. Sınıf">3. Sınıf</option>
+                        <option value="4. Sınıf">4. Sınıf</option>
+                        <option value="5. Sınıf">5. Sınıf</option>
+                        <option value="6. Sınıf">6. Sınıf</option>
+                        <option value="7. Sınıf">7. Sınıf</option>
+                        <option value="8. Sınıf">8. Sınıf</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label>Telefon</label>
+                    <input type="tel" name="telefon" required placeholder="05XX XXX XX XX">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Görüşme Tarihi</label>
+                <input type="date" id="randevuTarihi" name="randevuTarihi" required>
+            </div>
+
+            <div class="form-group">
+                <label>Görüşme Odası Seçimi</label>
+                <div class="room-container">
+                    <div class="room-card" onclick="selectRoom('Oda 1', this)">Oda 1</div>
+                    <div class="room-card" onclick="selectRoom('Oda 2', this)">Oda 2</div>
+                    <div class="room-card" onclick="selectRoom('Oda 3', this)">Oda 3</div>
+                    <div class="room-card" onclick="selectRoom('Oda 4', this)">Oda 4</div>
+                    <div class="room-card" onclick="selectRoom('Oda 5', this)">Oda 5</div>
+                </div>
+                <input type="hidden" id="secilenOda" name="secilenOda" required>
+                <div id="roomWarning" style="font-size: 0.9em; color: #e74c3c; display:none;">Lütfen önce tarih seçiniz.</div>
+            </div>
+
+            <div class="form-group">
+                <label>Randevu Saati <span id="loadingText" style="font-weight: normal; color: #3498db; font-size: 0.9em;"></span></label>
+                <select id="randevuSaati" name="randevuSaati" required disabled>
+                    <option value="">Önce Tarih ve Oda Seçiniz</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submitButton">Randevuyu Onayla</button>
+            <div id="statusMessage"></div>
+        </form>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
+
+        const dateInput = document.getElementById('randevuTarihi');
+        const timeSelect = document.getElementById('randevuSaati');
+        const roomInput = document.getElementById('secilenOda');
+        let currentBookings = []; 
+
+        dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+
+        dateInput.addEventListener('change', async function() {
+            if (!this.value) return;
+            
+            document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+            roomInput.value = '';
+            timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
+            timeSelect.disabled = true;
+            document.getElementById('roomWarning').style.display = 'none';
+            
+            document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Müsaitlikler kontrol ediliyor...';
+            
+            try {
+                const response = await fetch(`${SCRIPT_URL}?date=${this.value}`);
+                const data = await response.json();
+                
+                if (data.result === 'success') {
+                    currentBookings = data.bookings; 
+                    document.getElementById('loadingText').textContent = '✓ Güncel';
+                    document.getElementById('loadingText').style.color = '#27ae60';
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loadingText').textContent = 'Hata oluştu';
+            }
+        });
+
+        function selectRoom(roomName, element) {
+            if (!dateInput.value) {
+                document.getElementById('roomWarning').style.display = 'block';
+                return;
+            }
+
+            document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            roomInput.value = roomName;
+
+            generateTimeSlots(roomName);
+        }
+
+        function generateTimeSlots(selectedRoom) {
+            timeSelect.innerHTML = '';
+            const availableTimes = [];
+            
+            for (let hour = 9; hour <= 17; hour++) {
+                for (let minute = 0; minute < 60; minute += 30) {
+                    if (hour === 9 && minute < 30) continue;
+                    if (hour === 17 && minute > 0) continue;
+                    if (hour === 12 && minute === 30) continue; 
+                    if (hour === 13 && minute === 0) continue;
+
+                    const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    
+                    const checkString = `${selectedRoom}-${timeString}`;
+                    
+                    if (!currentBookings.includes(checkString)) {
+                        availableTimes.push(timeString);
+                    }
+                }
+            }
+
+            if (availableTimes.length === 0) {
+                timeSelect.innerHTML = '<option value="">Bu oda için yer kalmadı.</option>';
+                timeSelect.disabled = true;
+            } else {
+                availableTimes.forEach(time => {
+                    const option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = time;
+                    timeSelect.appendChild(option);
+                });
+                timeSelect.disabled = false;
+            }
+        }
+
+        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitButton');
+            const msg = document.getElementById('statusMessage');
+            
+            btn.disabled = true;
+            btn.textContent = 'Kaydediliyor...';
+            msg.style.display = 'none';
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(() => {
+                msg.textContent = 'Erken kayıt randevunuz başarıyla oluşturuldu! Sizi bekliyoruz.';
+                msg.className = 'success';
+                msg.style.display = 'block';
+                this.reset();
+                document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+                timeSelect.innerHTML = '<option value="">Önce Tarih ve Oda Seçiniz</option>';
+                timeSelect.disabled = true;
+                currentBookings = [];
+            })
+            .catch(error => {
+                msg.textContent = 'Bağlantı hatası oluştu. Lütfen tekrar deneyin.';
+                msg.className = 'error';
+                msg.style.display = 'block';
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'Randevuyu Onayla';
+            });
+        });
+    </script>
