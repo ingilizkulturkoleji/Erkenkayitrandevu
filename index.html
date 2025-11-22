@@ -51,7 +51,8 @@
                     <label>Öğrenci Sınıfı</label>
                     <select name="ogrenciSinifi" required>
                         <option value="">Seçiniz</option>
-                        <option value="Anaokulu">Anaokulu</option> <option value="1. Sınıf">1. Sınıf</option>
+                        <option value="Anaokulu">Anaokulu</option>
+                        <option value="1. Sınıf">1. Sınıf</option>
                         <option value="2. Sınıf">2. Sınıf</option>
                         <option value="3. Sınıf">3. Sınıf</option>
                         <option value="4. Sınıf">4. Sınıf</option>
@@ -98,7 +99,7 @@
     </div>
 
     <script>
-        // !!! KENDİ URL'NİZİ BURAYA YAPIŞTIRIN !!!
+        // EKRAN GÖRÜNTÜSÜNDEKİ URL BURAYA EKLENDİ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
         const dateInput = document.getElementById('randevuTarihi');
@@ -119,7 +120,6 @@
             timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
-            
             document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Kontrol ediliyor...';
             
             try {
@@ -151,29 +151,25 @@
             generateTimeSlots(roomName);
         }
 
-        // --- GÜNCELLENEN SAAT MANTIĞI (20 DK ARALIK) ---
+        // --- SAAT MANTIĞI: 20 DK + ÖĞLE ARASI (12:40 AÇIK, 13:00 KAPALI) ---
         function generateTimeSlots(selectedRoom) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
             
-            // Saat 09:00'da başla, 17:00'ye kadar devam et.
-            for (let hour = 9; hour <= 17; hour++) {
-                // Dakikaları 20'şer artır (0, 20, 40)
+            // 9'dan 17'ye kadar (17 hariç çünkü son seans 16:40)
+            for (let hour = 9; hour < 17; hour++) {
                 for (let minute = 0; minute < 60; minute += 20) {
                     
-                    // 17:00'den sonra randevu verme (17:20 vs. olmasın)
-                    if (hour === 17 && minute > 0) continue;
-
-                    // ÖĞLE ARASI KURALI: 12:40 ve 13:00 saatlerini atla.
-                    // Bu sayede 12:20 son seans olur, 13:20'de tekrar başlar.
-                    if (hour === 12 && minute === 40) continue; 
-                    if (hour === 13 && minute === 0) continue;
+                    // ÖĞLE ARASI KURALI: 
+                    // 12:40 -> Listeye eklenir. (13:00'da biter)
+                    // 13:00 -> LİSTEYE EKLENMEZ. (Boşluk saati)
+                    // 13:20 -> Listeye eklenir.
+                    if (hour === 13 && minute === 0) continue; 
 
                     const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                     
-                    // ÇAKIŞMA KONTROLÜ: O oda ve O saat dolu mu?
+                    // ÇAKIŞMA KONTROLÜ
                     const checkString = `${selectedRoom}-${timeString}`;
-                    
                     if (!currentBookings.includes(checkString)) {
                         availableTimes.push(timeString);
                     }
