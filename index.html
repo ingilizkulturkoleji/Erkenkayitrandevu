@@ -23,6 +23,9 @@
         }
         .room-card:hover { border-color: var(--accent); color: var(--accent); }
         .room-card.selected { background-color: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3); }
+        
+        /* Gizli oda sınıfı (Pazar günleri için) */
+        .hidden-room { display: none !important; }
 
         button#submitButton { width: 100%; padding: 16px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         button#submitButton:hover:not(:disabled) { background-color: #34495e; transform: translateY(-2px); }
@@ -69,18 +72,18 @@
             </div>
 
             <div class="form-group">
-                <label>Görüşme Tarihi</label>
+                <label>Görüşme Tarihi (1 Aralık - 1 Ocak)</label>
                 <input type="date" id="randevuTarihi" name="randevuTarihi" required>
             </div>
 
             <div class="form-group">
                 <label>Görüşme Odası Seçimi</label>
                 <div class="room-container">
-                    <div class="room-card" onclick="selectRoom('Oda 1', this)">Oda 1</div>
-                    <div class="room-card" onclick="selectRoom('Oda 2', this)">Oda 2</div>
-                    <div class="room-card" onclick="selectRoom('Oda 3', this)">Oda 3</div>
-                    <div class="room-card" onclick="selectRoom('Oda 4', this)">Oda 4</div>
-                    <div class="room-card" onclick="selectRoom('Oda 5', this)">Oda 5</div>
+                    <div class="room-card" id="room-1" onclick="selectRoom('Oda 1', this)">Oda 1</div>
+                    <div class="room-card" id="room-2" onclick="selectRoom('Oda 2', this)">Oda 2</div>
+                    <div class="room-card" id="room-3" onclick="selectRoom('Oda 3', this)">Oda 3</div>
+                    <div class="room-card" id="room-4" onclick="selectRoom('Oda 4', this)">Oda 4</div>
+                    <div class="room-card" id="room-5" onclick="selectRoom('Oda 5', this)">Oda 5</div>
                 </div>
                 <input type="hidden" id="secilenOda" name="secilenOda" required>
                 <div id="roomWarning" style="font-size: 0.9em; color: #e74c3c; display:none;">Lütfen önce tarih seçiniz.</div>
@@ -99,7 +102,7 @@
     </div>
 
     <script>
-        // SİZİN YENİ VE İZİNLİ URL'NİZ BURAYA EKLENDİ
+        // SİZİN URL'NİZ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
         const dateInput = document.getElementById('randevuTarihi');
@@ -107,19 +110,44 @@
         const roomInput = document.getElementById('secilenOda');
         let currentBookings = []; 
 
-        // Bugünden öncesini engelle
-        dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+        // --- TARİH KISITLAMASI (1 Aralık - 1 Ocak) ---
+        // Bu yılın tarihini alıp aralığı belirliyoruz
+        const currentYear = new Date().getFullYear();
+        const minDate = `${currentYear}-12-01`; // 1 Aralık
+        const maxDate = `${currentYear + 1}-01-01`; // 1 Ocak (Sonraki yıl)
+        
+        dateInput.setAttribute('min', minDate);
+        dateInput.setAttribute('max', maxDate);
 
-        // Tarih seçilince veriyi çek
+        // Tarih seçilince çalışacak kodlar
         dateInput.addEventListener('change', async function() {
             if (!this.value) return;
             
-            // Sıfırlama
+            // Sıfırlama işlemleri
             document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
             roomInput.value = '';
             timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
+            
+            // --- PAZAR GÜNÜ KONTROLÜ ---
+            const selectedDate = new Date(this.value);
+            const dayOfWeek = selectedDate.getDay(); // 0 = Pazar, 1 = Pts...
+            
+            const room4 = document.getElementById('room-4');
+            const room5 = document.getElementById('room-5');
+
+            if (dayOfWeek === 0) {
+                // Eğer gün Pazar ise (0), Oda 4 ve 5'i gizle
+                room4.classList.add('hidden-room');
+                room5.classList.add('hidden-room');
+            } else {
+                // Diğer günler görünür yap
+                room4.classList.remove('hidden-room');
+                room5.classList.remove('hidden-room');
+            }
+            // ---------------------------
+
             document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Kontrol ediliyor...';
             
             try {
@@ -151,24 +179,18 @@
             generateTimeSlots(roomName);
         }
 
-        // --- SAAT MANTIĞI: 20 DK + ÖĞLE ARASI (12:40 AÇIK, 13:00 KAPALI) ---
+        // --- SAAT MANTIĞI ---
         function generateTimeSlots(selectedRoom) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
             
-            // 9'dan 17'ye kadar (17 hariç çünkü son seans 16:40)
             for (let hour = 9; hour < 17; hour++) {
                 for (let minute = 0; minute < 60; minute += 20) {
                     
-                    // ÖĞLE ARASI KURALI: 
-                    // 12:40 -> Listeye eklenir. (13:00'da biter)
-                    // 13:00 -> LİSTEYE EKLENMEZ. (Boşluk saati)
-                    // 13:20 -> Listeye eklenir.
-                    if (hour === 13 && minute === 0) continue; 
+                    if (hour === 13 && minute === 0) continue; // Öğle arası (13:00 iptal)
 
                     const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                     
-                    // ÇAKIŞMA KONTROLÜ
                     const checkString = `${selectedRoom}-${timeString}`;
                     if (!currentBookings.includes(checkString)) {
                         availableTimes.push(timeString);
@@ -215,6 +237,10 @@
                 msg.style.display = 'block';
                 this.reset();
                 document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+                // Odayı resetledikten sonra gizli odaları tekrar göster (varsayılan duruma dön)
+                document.getElementById('room-4').classList.remove('hidden-room');
+                document.getElementById('room-5').classList.remove('hidden-room');
+                
                 timeSelect.innerHTML = '<option value="">Önce Tarih ve Oda Seçiniz</option>';
                 timeSelect.disabled = true;
                 currentBookings = [];
