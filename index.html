@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Erken Kayıt Randevu Sistemi</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-
     <style>
-        /* MODERN PREMİUM TASARIM CSS */
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
@@ -47,116 +45,33 @@
             border: 1px solid #ffffff;
         }
 
-        .logo {
-            display: block;
-            max-width: 160px;
-            margin: 0 auto 25px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
-        }
-
-        h2 {
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
-            color: var(--text-dark);
-            margin-bottom: 35px;
-            font-weight: 700;
-            font-size: 1.8rem;
-            letter-spacing: -0.5px;
-        }
-        
+        .logo { display: block; max-width: 160px; margin: 0 auto 25px; }
+        h2 { font-family: 'Poppins', sans-serif; text-align: center; color: var(--text-dark); margin-bottom: 35px; font-weight: 700; font-size: 1.8rem; }
         .form-group { margin-bottom: 24px; }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: var(--text-dark);
-            font-size: 0.95rem;
-        }
+        label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
 
         input, select {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--border-light);
-            border-radius: 12px;
-            font-size: 15px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            background-color: #f8fafc;
-            color: var(--text-dark);
-            font-family: 'Inter', sans-serif;
+            width: 100%; padding: 14px 16px; border: 2px solid var(--border-light); border-radius: 12px; font-size: 15px; box-sizing: border-box; transition: all 0.3s ease; background-color: #f8fafc; color: var(--text-dark); font-family: 'Inter', sans-serif;
         }
-
-        input:focus, select:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 4px var(--primary-soft);
-            background-color: #fff;
-        }
+        input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px var(--primary-soft); background-color: #fff; }
         
         .flex-group { display: flex; gap: 15px; }
         .flex-group > div { flex: 1; }
         @media (max-width: 480px) { .flex-group { flex-direction: column; } }
 
-        .room-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        /* ODA KARTLARI */
+        .room-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 12px; margin-bottom: 25px; }
         .room-card {
-            background: #fff;
-            border: 2px solid var(--border-light);
-            border-radius: 12px;
-            padding: 12px 5px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            position: relative;
-            overflow: hidden;
+            background: #fff; border: 2px solid var(--border-light); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; color: var(--text-muted); font-size: 0.85rem; position: relative; overflow: hidden;
         }
-        .room-card:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-        }
-        .room-card.selected {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
-            transform: translateY(-3px);
-        }
+        .room-card:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-3px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+        .room-card.selected { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-color: transparent; box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4); transform: translateY(-3px); }
         
-        /* Gizli oda sınıfı (Pazar günleri için) */
         .hidden-room { display: none !important; }
 
-        button#submitButton {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-        }
-        button#submitButton:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
-            filter: brightness(1.1);
-        }
-        button:disabled {
-            background: var(--border-light);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+        button#submitButton { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 17px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 15px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
+        button#submitButton:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); filter: brightness(1.1); }
+        button:disabled { background: var(--border-light); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
 
         #statusMessage { text-align: center; margin-top: 25px; padding: 18px; border-radius: 12px; font-weight: 600; display: none; font-size: 0.95rem; }
         .success { background-color: var(--success-bg); color: var(--success-text); border: 1px solid #a7f3d0; }
@@ -177,7 +92,12 @@
         <form id="appointmentForm">
             <div class="form-group">
                 <label>Veli Adı Soyadı</label>
-                <input type="text" name="veliAdiSoyadi" required placeholder="Örn: Ahmet Yılmaz">
+                <input type="text" name="veliAdiSoyadi" required placeholder="Veli Adı Soyadı">
+            </div>
+
+            <div class="form-group">
+                <label>Öğrenci Adı Soyadı</label>
+                <input type="text" name="ogrenciAdiSoyadi" required placeholder="Öğrenci Adı Soyadı">
             </div>
             
             <div class="form-group flex-group">
@@ -208,13 +128,13 @@
             </div>
 
             <div class="form-group">
-                <label>Görüşme Odası Seçimi</label>
+                <label>Görüşme Odası (Salon)</label>
                 <div class="room-container">
-                    <div class="room-card" id="room-1" onclick="selectRoom('Oda 1', this)">Oda 1</div>
-                    <div class="room-card" id="room-2" onclick="selectRoom('Oda 2', this)">Oda 2</div>
-                    <div class="room-card" id="room-3" onclick="selectRoom('Oda 3', this)">Oda 3</div>
-                    <div class="room-card" id="room-4" onclick="selectRoom('Oda 4', this)">Oda 4</div>
-                    <div class="room-card" id="room-5" onclick="selectRoom('Oda 5', this)">Oda 5</div>
+                    <div class="room-card" id="room-1" onclick="selectRoom('Londra', this)">Londra</div>
+                    <div class="room-card" id="room-2" onclick="selectRoom('Manchester', this)">Manchester</div>
+                    <div class="room-card" id="room-3" onclick="selectRoom('Liverpool', this)">Liverpool</div>
+                    <div class="room-card" id="room-4" onclick="selectRoom('Cambridge', this)">Cambridge</div>
+                    <div class="room-card" id="room-5" onclick="selectRoom('Oxford', this)">Oxford</div>
                 </div>
                 <input type="hidden" id="secilenOda" name="secilenOda" required>
                 <div id="roomWarning">⚠️ Lütfen önce yukarıdan bir tarih seçiniz.</div>
@@ -233,7 +153,7 @@
     </div>
 
     <script>
-        // SİZİN URL'NİZ BURADA
+        // SİZİN URL'NİZ BURADA (Aynı kalacak)
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
         const dateInput = document.getElementById('randevuTarihi');
@@ -241,7 +161,6 @@
         const roomInput = document.getElementById('secilenOda');
         let currentBookings = []; 
 
-        // Tarih Kısıtlaması
         const currentYear = new Date().getFullYear();
         const minDate = `${currentYear}-12-01`;
         const maxDate = `${currentYear + 1}-01-01`;
@@ -251,30 +170,26 @@
         dateInput.addEventListener('change', async function() {
             if (!this.value) return;
             
-            // Sıfırlama
             document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
             roomInput.value = '';
             timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
             
-            // --- PAZAR GÜNÜ ODA KONTROLÜ (3 ODA) ---
+            // PAZAR GÜNÜ KONTROLÜ (4. ve 5. Odaları Gizle: Cambridge ve Oxford)
             const selectedDate = new Date(this.value);
-            const dayOfWeek = selectedDate.getDay(); // 0 = Pazar
+            const dayOfWeek = selectedDate.getDay(); 
             const room4 = document.getElementById('room-4');
             const room5 = document.getElementById('room-5');
 
             if (dayOfWeek === 0) {
-                // Pazar ise Oda 4 ve 5'i gizle
                 room4.classList.add('hidden-room');
                 room5.classList.add('hidden-room');
             } else {
-                // Diğer günler göster
                 room4.classList.remove('hidden-room');
                 room5.classList.remove('hidden-room');
             }
 
-            // Müsaitlik Kontrolü
             document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Kontrol ediliyor...';
             try {
                 const response = await fetch(`${SCRIPT_URL}?date=${this.value}`);
@@ -298,49 +213,28 @@
             element.classList.add('selected');
             roomInput.value = roomName;
             
-            // Gün bilgisini saat fonksiyonuna gönderiyoruz
             const selectedDate = new Date(dateInput.value);
             const isSunday = selectedDate.getDay() === 0;
             generateTimeSlots(roomName, isSunday);
         }
 
-        // --- GÜNCELLENMİŞ SAAT MANTIĞI (PAZAR ÖZEL) ---
         function generateTimeSlots(selectedRoom, isSunday) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
             
-            // Pazar: 10:30 - 16:30 | Diğerleri: 09:00 - 17:00
-            // Döngüyü geniş tutalım, içeride filtreleyelim
             for (let hour = 9; hour < 17; hour++) {
                 for (let minute = 0; minute < 60; minute += 20) {
                     
-                    // --- GENEL KURALLAR ---
-                    // Öğle arası (Tüm günler): 12:40 açık, 13:00 kapalı.
                     if (hour === 13 && minute === 0) continue; 
 
-                    // --- PAZAR GÜNÜ KURALLARI ---
                     if (isSunday) {
-                        // Başlangıç: 10:30
-                        // (Matematiksel olarak 10:40 ilk 20'lik dilimdir)
                         if (hour < 10) continue;
                         if (hour === 10 && minute < 30) continue; 
-
-                        // Bitiş: 16:30
-                        // Son randevu bitiş saati 16:30'u geçmemeli.
-                        // Randevu süresi 20 dk. 
-                        // 16:00 başlar -> 16:20 biter (OK)
-                        // 16:20 başlar -> 16:40 biter (OLMAZ, 16:30 sınır)
                         if (hour === 16 && (minute + 20) > 30) continue;
                         if (hour > 16) continue;
                     } 
-                    // --- HAFTA İÇİ KURALLARI ---
-                    else {
-                        // Hafta içi normal 09:00 - 16:40 (17:00 mesai bitişi)
-                        // Döngü zaten < 17 olduğu için sorun yok
-                    }
 
                     const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-                    
                     const checkString = `${selectedRoom}-${timeString}`;
                     if (!currentBookings.includes(checkString)) {
                         availableTimes.push(timeString);
@@ -349,7 +243,7 @@
             }
 
             if (availableTimes.length === 0) {
-                timeSelect.innerHTML = '<option value="">Bu oda için uygun saat kalmadı.</option>';
+                timeSelect.innerHTML = '<option value="">Bu oda doludur.</option>';
                 timeSelect.disabled = true;
             } else {
                 availableTimes.forEach(time => {
@@ -385,7 +279,6 @@
                 msg.style.display = 'block';
                 this.reset();
                 document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
-                // Gizlenen odaları geri getir (varsayılan duruma dön)
                 document.getElementById('room-4').classList.remove('hidden-room');
                 document.getElementById('room-5').classList.remove('hidden-room');
                 timeSelect.innerHTML = '<option value="">Önce Tarih ve Oda Seçiniz</option>';
