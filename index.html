@@ -7,27 +7,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- YENİ MODERN MAVİ RENK PALETİ --- */
+        /* MODERN PREMİUM TASARIM CSS */
         :root {
-            --primary: #2563eb;      /* Ana güvenilir mavi */
-            --primary-dark: #1d4ed8; /* Hover durumları için koyu mavi */
-            --primary-soft: #dbeafe; /* Çok açık mavi vurgular */
-            --text-dark: #1e293b;    /* Koyu lacivert-gri metin (siyah yerine) */
-            --text-muted: #64748b;   /* İkincil metinler */
-            --bg-body: #f0f5ff;      /* Göz yormayan açık mavi arka plan */
-            --bg-card: #ffffff;      /* Kart arka planı */
-            --border-light: #e2e8f0; /* İnce gri-mavi kenarlıklar */
-            --success-bg: #d1fae5;   /* Başarılı işlem arka planı */
-            --success-text:#065f46;  /* Başarılı işlem metni */
-            --error-bg: #fee2e2;     /* Hata arka planı */
-            --error-text: #991b1b;   /* Hata metni */
-            --shadow-soft: 0 10px 30px -5px rgba(37, 99, 235, 0.1), 0 4px 10px -3px rgba(0, 0, 0, 0.05); /* Yumuşak mavi gölge */
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-soft: #dbeafe;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --bg-body: #f0f5ff;
+            --bg-card: #ffffff;
+            --border-light: #e2e8f0;
+            --success-bg: #d1fae5;
+            --success-text:#065f46;
+            --error-bg: #fee2e2;
+            --error-text: #991b1b;
+            --shadow-soft: 0 10px 30px -5px rgba(37, 99, 235, 0.1), 0 4px 10px -3px rgba(0, 0, 0, 0.05);
         }
 
         body {
-            font-family: 'Inter', sans-serif; /* Gövde için temiz font */
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
-            background-image: linear-gradient(to bottom right, #f0f5ff, #e0eaff); /* Hafif gradyan arka plan */
+            background-image: linear-gradient(to bottom right, #f0f5ff, #e0eaff);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -40,11 +40,11 @@
         .container {
             background-color: var(--bg-card);
             padding: 40px;
-            border-radius: 24px; /* Daha yuvarlak köşeler */
-            box-shadow: var(--shadow-soft); /* Modern gölge */
+            border-radius: 24px;
+            box-shadow: var(--shadow-soft);
             width: 100%;
             max-width: 550px;
-            border: 1px solid #ffffff; /* İnce beyaz çerçeve parlaklık verir */
+            border: 1px solid #ffffff;
         }
 
         .logo {
@@ -55,7 +55,7 @@
         }
 
         h2 {
-            font-family: 'Poppins', sans-serif; /* Başlık için güçlü font */
+            font-family: 'Poppins', sans-serif;
             text-align: center;
             color: var(--text-dark);
             margin-bottom: 35px;
@@ -74,7 +74,6 @@
             font-size: 0.95rem;
         }
 
-        /* Modern Form Elemanları */
         input, select {
             width: 100%;
             padding: 14px 16px;
@@ -83,12 +82,11 @@
             font-size: 15px;
             box-sizing: border-box;
             transition: all 0.3s ease;
-            background-color: #f8fafc; /* Hafif gri arka plan */
+            background-color: #f8fafc;
             color: var(--text-dark);
             font-family: 'Inter', sans-serif;
         }
 
-        /* Tıklanınca oluşan mavi ışık halkası */
         input:focus, select:focus {
             border-color: var(--primary);
             outline: none;
@@ -96,18 +94,10 @@
             background-color: #fff;
         }
         
-        ::placeholder { color: #94a3b8; }
-
-        /* FLEX Alanlar (Sınıf ve Telefon yan yana) */
-        .flex-group {
-            display: flex;
-            gap: 15px;
-        }
+        .flex-group { display: flex; gap: 15px; }
         .flex-group > div { flex: 1; }
-        @media (max-width: 480px) { .flex-group { flex-direction: column; } } /* Mobilde alt alta */
+        @media (max-width: 480px) { .flex-group { flex-direction: column; } }
 
-
-        /* MODERN ODA KARTLARI */
         .room-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 12px; margin-bottom: 25px; }
         .room-card {
             background: #fff;
@@ -126,25 +116,24 @@
         .room-card:hover {
             border-color: var(--primary);
             color: var(--primary);
-            transform: translateY(-3px); /* Hafif yukarı kalkma efekti */
+            transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
         }
-        /* Seçili Oda Stili */
         .room-card.selected {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); /* Gradyan arka plan */
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border-color: transparent;
             box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
             transform: translateY(-3px);
         }
         
+        /* Gizli oda sınıfı (Pazar günleri için) */
         .hidden-room { display: none !important; }
 
-        /* MODERN BUTON */
         button#submitButton {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); /* Mavi gradyan */
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             border-radius: 14px;
@@ -154,7 +143,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); /* Buton gölgesi */
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         }
         button#submitButton:hover:not(:disabled) {
             transform: translateY(-3px);
@@ -169,15 +158,12 @@
             box-shadow: none;
         }
 
-        /* Bildirim Mesajları */
         #statusMessage { text-align: center; margin-top: 25px; padding: 18px; border-radius: 12px; font-weight: 600; display: none; font-size: 0.95rem; }
         .success { background-color: var(--success-bg); color: var(--success-text); border: 1px solid #a7f3d0; }
         .error { background-color: var(--error-bg); color: var(--error-text); border: 1px solid #fecaca;}
         
-        /* Yükleniyor Animasyonu */
         .loader { border: 3px solid var(--primary-soft); border-top: 3px solid var(--primary); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         #loadingText { font-weight: 500; color: var(--primary); font-size: 0.9em; margin-left: 5px; }
         #roomWarning { font-size: 0.9em; color: var(--error-text); display:none; margin-top: 8px; font-weight: 500; }
     </style>
@@ -247,6 +233,7 @@
     </div>
 
     <script>
+        // SİZİN URL'NİZ BURADA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
         const dateInput = document.getElementById('randevuTarihi');
@@ -254,6 +241,7 @@
         const roomInput = document.getElementById('secilenOda');
         let currentBookings = []; 
 
+        // Tarih Kısıtlaması
         const currentYear = new Date().getFullYear();
         const minDate = `${currentYear}-12-01`;
         const maxDate = `${currentYear + 1}-01-01`;
@@ -262,24 +250,31 @@
 
         dateInput.addEventListener('change', async function() {
             if (!this.value) return;
+            
+            // Sıfırlama
             document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
             roomInput.value = '';
             timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
             
+            // --- PAZAR GÜNÜ ODA KONTROLÜ (3 ODA) ---
             const selectedDate = new Date(this.value);
-            const dayOfWeek = selectedDate.getDay();
+            const dayOfWeek = selectedDate.getDay(); // 0 = Pazar
             const room4 = document.getElementById('room-4');
             const room5 = document.getElementById('room-5');
+
             if (dayOfWeek === 0) {
+                // Pazar ise Oda 4 ve 5'i gizle
                 room4.classList.add('hidden-room');
                 room5.classList.add('hidden-room');
             } else {
+                // Diğer günler göster
                 room4.classList.remove('hidden-room');
                 room5.classList.remove('hidden-room');
             }
 
+            // Müsaitlik Kontrolü
             document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Kontrol ediliyor...';
             try {
                 const response = await fetch(`${SCRIPT_URL}?date=${this.value}`);
@@ -302,24 +297,59 @@
             document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
             element.classList.add('selected');
             roomInput.value = roomName;
-            generateTimeSlots(roomName);
+            
+            // Gün bilgisini saat fonksiyonuna gönderiyoruz
+            const selectedDate = new Date(dateInput.value);
+            const isSunday = selectedDate.getDay() === 0;
+            generateTimeSlots(roomName, isSunday);
         }
 
-        function generateTimeSlots(selectedRoom) {
+        // --- GÜNCELLENMİŞ SAAT MANTIĞI (PAZAR ÖZEL) ---
+        function generateTimeSlots(selectedRoom, isSunday) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
+            
+            // Pazar: 10:30 - 16:30 | Diğerleri: 09:00 - 17:00
+            // Döngüyü geniş tutalım, içeride filtreleyelim
             for (let hour = 9; hour < 17; hour++) {
                 for (let minute = 0; minute < 60; minute += 20) {
+                    
+                    // --- GENEL KURALLAR ---
+                    // Öğle arası (Tüm günler): 12:40 açık, 13:00 kapalı.
                     if (hour === 13 && minute === 0) continue; 
+
+                    // --- PAZAR GÜNÜ KURALLARI ---
+                    if (isSunday) {
+                        // Başlangıç: 10:30
+                        // (Matematiksel olarak 10:40 ilk 20'lik dilimdir)
+                        if (hour < 10) continue;
+                        if (hour === 10 && minute < 30) continue; 
+
+                        // Bitiş: 16:30
+                        // Son randevu bitiş saati 16:30'u geçmemeli.
+                        // Randevu süresi 20 dk. 
+                        // 16:00 başlar -> 16:20 biter (OK)
+                        // 16:20 başlar -> 16:40 biter (OLMAZ, 16:30 sınır)
+                        if (hour === 16 && (minute + 20) > 30) continue;
+                        if (hour > 16) continue;
+                    } 
+                    // --- HAFTA İÇİ KURALLARI ---
+                    else {
+                        // Hafta içi normal 09:00 - 16:40 (17:00 mesai bitişi)
+                        // Döngü zaten < 17 olduğu için sorun yok
+                    }
+
                     const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    
                     const checkString = `${selectedRoom}-${timeString}`;
                     if (!currentBookings.includes(checkString)) {
                         availableTimes.push(timeString);
                     }
                 }
             }
+
             if (availableTimes.length === 0) {
-                timeSelect.innerHTML = '<option value="">Bu oda doludur.</option>';
+                timeSelect.innerHTML = '<option value="">Bu oda için uygun saat kalmadı.</option>';
                 timeSelect.disabled = true;
             } else {
                 availableTimes.forEach(time => {
@@ -355,6 +385,7 @@
                 msg.style.display = 'block';
                 this.reset();
                 document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+                // Gizlenen odaları geri getir (varsayılan duruma dön)
                 document.getElementById('room-4').classList.remove('hidden-room');
                 document.getElementById('room-5').classList.remove('hidden-room');
                 timeSelect.innerHTML = '<option value="">Önce Tarih ve Oda Seçiniz</option>';
