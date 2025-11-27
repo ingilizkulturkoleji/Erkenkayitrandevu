@@ -7,18 +7,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-soft: #dbeafe;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-            --bg-body: #f0f5ff;
-            --bg-card: #ffffff;
-            --border-light: #e2e8f0;
-            --success-bg: #d1fae5;
-            --success-text:#065f46;
-            --error-bg: #fee2e2;
-            --error-text: #991b1b;
+            --primary: #2563eb; --primary-dark: #1d4ed8; --primary-soft: #dbeafe;
+            --text-dark: #1e293b; --text-muted: #64748b; --bg-body: #f0f5ff;
+            --bg-card: #ffffff; --border-light: #e2e8f0;
+            --success-bg: #d1fae5; --success-text:#065f46;
+            --error-bg: #fee2e2; --error-text: #991b1b;
             --shadow-soft: 0 10px 30px -5px rgba(37, 99, 235, 0.1), 0 4px 10px -3px rgba(0, 0, 0, 0.05);
         }
 
@@ -59,7 +52,6 @@
         .flex-group > div { flex: 1; }
         @media (max-width: 480px) { .flex-group { flex-direction: column; } }
 
-        /* ODA KARTLARI */
         .room-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 12px; margin-bottom: 25px; }
         .room-card {
             background: #fff; border: 2px solid var(--border-light); border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; color: var(--text-muted); font-size: 0.85rem; position: relative; overflow: hidden;
@@ -67,6 +59,7 @@
         .room-card:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-3px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
         .room-card.selected { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-color: transparent; box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4); transform: translateY(-3px); }
         
+        /* Gizli oda sınıfı */
         .hidden-room { display: none !important; }
 
         button#submitButton { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 17px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 15px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
@@ -128,13 +121,12 @@
             </div>
 
             <div class="form-group">
-                <label>Görüşme Odası (Salon)</label>
+                <label>Görüşme Odası Seçimi</label>
                 <div class="room-container">
-                    <div class="room-card" id="room-1" onclick="selectRoom('Londra', this)">Londra</div>
-                    <div class="room-card" id="room-2" onclick="selectRoom('Manchester', this)">Manchester</div>
-                    <div class="room-card" id="room-3" onclick="selectRoom('Liverpool', this)">Liverpool</div>
-                    <div class="room-card" id="room-4" onclick="selectRoom('Cambridge', this)">Cambridge</div>
-                    <div class="room-card" id="room-5" onclick="selectRoom('Oxford', this)">Oxford</div>
+                    <div class="room-card" id="room-manchester" onclick="selectRoom('Manchester', this)">Manchester</div>
+                    <div class="room-card" id="room-liverpool" onclick="selectRoom('Liverpool', this)">Liverpool</div>
+                    <div class="room-card" id="room-cambridge" onclick="selectRoom('Cambridge', this)">Cambridge</div>
+                    <div class="room-card" id="room-oxford" onclick="selectRoom('Oxford', this)">Oxford</div>
                 </div>
                 <input type="hidden" id="secilenOda" name="secilenOda" required>
                 <div id="roomWarning">⚠️ Lütfen önce yukarıdan bir tarih seçiniz.</div>
@@ -153,7 +145,7 @@
     </div>
 
     <script>
-        // SİZİN URL'NİZ BURADA (Aynı kalacak)
+        // URL BURAYA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
         const dateInput = document.getElementById('randevuTarihi');
@@ -170,24 +162,42 @@
         dateInput.addEventListener('change', async function() {
             if (!this.value) return;
             
+            // Sıfırlama
             document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
             roomInput.value = '';
             timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
             
-            // PAZAR GÜNÜ KONTROLÜ (4. ve 5. Odaları Gizle: Cambridge ve Oxford)
+            // --- ODA GÖRÜNÜRLÜK MANTIĞI ---
             const selectedDate = new Date(this.value);
-            const dayOfWeek = selectedDate.getDay(); 
-            const room4 = document.getElementById('room-4');
-            const room5 = document.getElementById('room-5');
+            const dayOfWeek = selectedDate.getDay(); // 0:Pazar, 1:Pts, ... 6:Cmt
+            
+            const roomManchester = document.getElementById('room-manchester');
+            const roomLiverpool = document.getElementById('room-liverpool');
+            const roomCambridge = document.getElementById('room-cambridge');
+            const roomOxford = document.getElementById('room-oxford');
+
+            // Önce hepsini görünür yap, sonra kurala göre gizle
+            roomManchester.classList.remove('hidden-room');
+            roomLiverpool.classList.remove('hidden-room');
+            roomCambridge.classList.remove('hidden-room');
+            roomOxford.classList.remove('hidden-room');
 
             if (dayOfWeek === 0) {
-                room4.classList.add('hidden-room');
-                room5.classList.add('hidden-room');
-            } else {
-                room4.classList.remove('hidden-room');
-                room5.classList.remove('hidden-room');
+                // PAZAR: Sadece Liverpool ve Cambridge açık
+                // Manchester ve Oxford GİZLİ
+                roomManchester.classList.add('hidden-room');
+                roomOxford.classList.add('hidden-room');
+            } 
+            else if (dayOfWeek === 6) {
+                // CUMARTESİ: Hepsi açık (Liverpool dahil)
+                // Hiçbir şey gizleme
+            } 
+            else {
+                // HAFTA İÇİ (Pzt-Cuma): Sadece Oxford, Manchester, Cambridge
+                // Liverpool GİZLİ
+                roomLiverpool.classList.add('hidden-room');
             }
 
             document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Kontrol ediliyor...';
@@ -222,17 +232,23 @@
             timeSelect.innerHTML = '';
             const availableTimes = [];
             
-            for (let hour = 9; hour < 17; hour++) {
+            // Başlangıç 09:00
+            for (let hour = 9; hour <= 17; hour++) {
                 for (let minute = 0; minute < 60; minute += 20) {
                     
+                    // ÖĞLE ARASI: 12:40 ve 13:00 kapalı.
+                    if (hour === 12 && minute === 40) continue;
                     if (hour === 13 && minute === 0) continue; 
 
+                    // PAZAR GÜNÜ BİTİŞ: 16:00
                     if (isSunday) {
-                        if (hour < 10) continue;
-                        if (hour === 10 && minute < 30) continue; 
-                        if (hour === 16 && (minute + 20) > 30) continue;
                         if (hour > 16) continue;
+                        if (hour === 16 && minute > 0) continue; // 16:20 olamaz
                     } 
+                    // DİĞER GÜNLER BİTİŞ: 17:00
+                    else {
+                        if (hour === 17 && minute > 0) continue; // 17:20 olamaz
+                    }
 
                     const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                     const checkString = `${selectedRoom}-${timeString}`;
@@ -279,8 +295,13 @@
                 msg.style.display = 'block';
                 this.reset();
                 document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
-                document.getElementById('room-4').classList.remove('hidden-room');
-                document.getElementById('room-5').classList.remove('hidden-room');
+                
+                // Form sıfırlanınca varsayılan görünümü (Hafta içi) uygula
+                document.getElementById('room-liverpool').classList.add('hidden-room'); 
+                document.getElementById('room-manchester').classList.remove('hidden-room');
+                document.getElementById('room-oxford').classList.remove('hidden-room');
+                document.getElementById('room-cambridge').classList.remove('hidden-room');
+
                 timeSelect.innerHTML = '<option value="">Önce Tarih ve Oda Seçiniz</option>';
                 timeSelect.disabled = true;
                 currentBookings = [];
