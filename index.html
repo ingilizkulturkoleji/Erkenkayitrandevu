@@ -43,6 +43,7 @@
     </style>
 </head>
 <body>
+
     <div class="container">
         <img src="https://i.hizliresim.com/6eldhh1.png" alt="Okul Logosu" class="logo">
         <h2>Erken Kayıt Randevusu</h2>
@@ -52,10 +53,12 @@
                 <label>Veli Adı Soyadı</label>
                 <input type="text" name="veliAdiSoyadi" required placeholder="Veli Adı Soyadı">
             </div>
+
             <div class="form-group">
                 <label>Öğrenci Adı Soyadı</label>
                 <input type="text" name="ogrenciAdiSoyadi" required placeholder="Öğrenci Adı Soyadı">
             </div>
+            
             <div class="form-group flex-group">
                 <div>
                     <label>Öğrenci Sınıfı</label>
@@ -77,27 +80,31 @@
                     <input type="tel" name="telefon" required placeholder="05XX XXX XX XX">
                 </div>
             </div>
+
             <div class="form-group">
                 <label>Görüşme Tarihi (1 Aralık - 1 Ocak)</label>
                 <input type="date" id="randevuTarihi" name="randevuTarihi" required>
             </div>
+
             <div class="form-group">
-                <label>Görüşme Odası (Salon)</label>
+                <label>Görüşme Odası Seçimi</label>
                 <div class="room-container">
                     <div class="room-card" id="room-manchester" onclick="selectRoom('Manchester', this)">Manchester</div>
                     <div class="room-card" id="room-liverpool" onclick="selectRoom('Liverpool', this)">Liverpool</div>
                     <div class="room-card" id="room-cambridge" onclick="selectRoom('Cambridge', this)">Cambridge</div>
                     <div class="room-card" id="room-oxford" onclick="selectRoom('Oxford', this)">Oxford</div>
                 </div>
-                <input type="hidden" id="secilenOda" name="secilenOda" required>
+                <input type="hidden" id="secilenOda" name="secilenOda">
                 <div id="roomWarning">⚠️ Lütfen önce yukarıdan bir tarih seçiniz.</div>
             </div>
+
             <div class="form-group">
                 <label>Randevu Saati <span id="loadingText"></span></label>
                 <select id="randevuSaati" name="randevuSaati" required disabled>
                     <option value="">Önce Tarih ve Oda Seçiniz</option>
                 </select>
             </div>
+
             <button type="submit" id="submitButton">Randevuyu Onayla</button>
             <div id="statusMessage"></div>
         </form>
@@ -120,6 +127,8 @@
 
         dateInput.addEventListener('change', async function() {
             if (!this.value) return;
+            
+            // Sıfırlama
             document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
             roomInput.value = '';
             timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
@@ -219,8 +228,28 @@
 
         document.getElementById('appointmentForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const btn = document.getElementById('submitButton');
+            
+            // --- GÜVENLİK KONTROLÜ (YENİ EKLENDİ) ---
+            const odaSecimi = document.getElementById('secilenOda').value;
+            const saatSecimi = document.getElementById('randevuSaati').value;
             const msg = document.getElementById('statusMessage');
+
+            if (!odaSecimi || odaSecimi === "") {
+                msg.innerHTML = '⚠️ Lütfen bir <b>Görüşme Odası</b> seçiniz!';
+                msg.className = 'error';
+                msg.style.display = 'block';
+                return; // İşlemi durdur
+            }
+
+            if (!saatSecimi || saatSecimi === "") {
+                msg.innerHTML = '⚠️ Lütfen bir <b>Randevu Saati</b> seçiniz!';
+                msg.className = 'error';
+                msg.style.display = 'block';
+                return; // İşlemi durdur
+            }
+            // ----------------------------------------
+
+            const btn = document.getElementById('submitButton');
             btn.disabled = true;
             btn.innerHTML = '<div class="loader" style="border-top-color:white; border-color: rgba(255,255,255,0.3); width: 16px; height: 16px;"></div> Kaydediliyor...';
             msg.style.display = 'none';
@@ -228,24 +257,18 @@
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
-            // DİKKAT: 'no-cors' modunu kaldırdık ki hata mesajlarını okuyabilelim.
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify(data),
-                // headers eklemiyoruz, Google Apps Script text/plain olarak alıp parse ediyor.
             })
-            .then(response => response.json()) // Cevabı JSON olarak oku
+            .then(response => response.json())
             .then(responseData => {
                 if (responseData.result === 'error') {
-                    // Backend'den hata geldiyse (Çifte rezervasyon)
                     msg.innerHTML = '⚠️ ' + responseData.message;
                     msg.className = 'error';
                     msg.style.display = 'block';
-                    // Sayfayı yenilemeye gerek yok, kullanıcı yeni saat seçmeli
-                    // Ama listeyi güncellemek iyi olur:
                     dateInput.dispatchEvent(new Event('change')); 
                 } else {
-                    // Başarılıysa
                     msg.innerHTML = '✅ Kaydınız başarıyla oluşturuldu! Teşekkürler.';
                     msg.className = 'success';
                     msg.style.display = 'block';
