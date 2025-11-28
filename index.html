@@ -43,7 +43,6 @@
     </style>
 </head>
 <body>
-
     <div class="container">
         <img src="https://i.hizliresim.com/6eldhh1.png" alt="Okul Logosu" class="logo">
         <h2>Erken Kayıt Randevusu</h2>
@@ -53,12 +52,10 @@
                 <label>Veli Adı Soyadı</label>
                 <input type="text" name="veliAdiSoyadi" required placeholder="Veli Adı Soyadı">
             </div>
-
             <div class="form-group">
                 <label>Öğrenci Adı Soyadı</label>
                 <input type="text" name="ogrenciAdiSoyadi" required placeholder="Öğrenci Adı Soyadı">
             </div>
-            
             <div class="form-group flex-group">
                 <div>
                     <label>Öğrenci Sınıfı</label>
@@ -80,14 +77,12 @@
                     <input type="tel" name="telefon" required placeholder="05XX XXX XX XX">
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Görüşme Tarihi (1 Aralık - 1 Ocak)</label>
                 <input type="date" id="randevuTarihi" name="randevuTarihi" required>
             </div>
-
             <div class="form-group">
-                <label>Görüşme Odası Seçimi</label>
+                <label>Görüşme Odası (Salon)</label>
                 <div class="room-container">
                     <div class="room-card" id="room-manchester" onclick="selectRoom('Manchester', this)">Manchester</div>
                     <div class="room-card" id="room-liverpool" onclick="selectRoom('Liverpool', this)">Liverpool</div>
@@ -97,14 +92,12 @@
                 <input type="hidden" id="secilenOda" name="secilenOda">
                 <div id="roomWarning">⚠️ Lütfen önce yukarıdan bir tarih seçiniz.</div>
             </div>
-
             <div class="form-group">
                 <label>Randevu Saati <span id="loadingText"></span></label>
                 <select id="randevuSaati" name="randevuSaati" required disabled>
                     <option value="">Önce Tarih ve Oda Seçiniz</option>
                 </select>
             </div>
-
             <button type="submit" id="submitButton">Randevuyu Onayla</button>
             <div id="statusMessage"></div>
         </form>
@@ -152,8 +145,7 @@
                 roomManchester.classList.add('hidden-room');
                 roomOxford.classList.add('hidden-room');
             } 
-            else if (dayOfWeek === 6) { // CUMARTESİ
-                // Hepsi açık
+            else if (dayOfWeek === 6) { // CUMARTESİ (Hepsi açık)
             } 
             else { // HAFTA İÇİ
                 roomLiverpool.classList.add('hidden-room');
@@ -187,21 +179,35 @@
             generateTimeSlots(roomName, isSunday);
         }
 
+        // --- GÜNCELLENMİŞ SAAT MANTIĞI (V9) ---
         function generateTimeSlots(selectedRoom, isSunday) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
             
+            // Döngü 09:00 - 17:00
             for (let hour = 9; hour <= 17; hour++) {
                 for (let minute = 0; minute < 60; minute += 20) {
                     
+                    // 1. ÖĞLE ARASI (Her gün için geçerli)
+                    // 12:40 ve 13:00 kapalı.
                     if (hour === 12 && minute === 40) continue;
                     if (hour === 13 && minute === 0) continue; 
 
                     if (isSunday) {
+                        // PAZAR GÜNÜ KURALLARI
+                        // Başlangıç: 10:00 (10'dan küçük her şeyi engelle)
+                        if (hour < 10) continue;
+
+                        // Bitiş: 16:00 (16:00'dan sonraki her şeyi engelle)
+                        // 16:00 kabul, 16:20 red.
+                        if (hour === 16 && minute > 0) continue;
                         if (hour > 16) continue;
-                        if (hour === 16 && minute > 0) continue; 
+
                     } else {
-                        if (hour === 17 && minute > 0) continue; 
+                        // DİĞER GÜNLER
+                        // Bitiş: 17:00 (17:00 kabul, 17:20 red)
+                        if (hour === 17 && minute > 0) continue;
+                        if (hour > 17) continue; 
                     }
 
                     const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
@@ -229,7 +235,6 @@
         document.getElementById('appointmentForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // --- GÜVENLİK KONTROLÜ (YENİ EKLENDİ) ---
             const odaSecimi = document.getElementById('secilenOda').value;
             const saatSecimi = document.getElementById('randevuSaati').value;
             const msg = document.getElementById('statusMessage');
@@ -238,16 +243,14 @@
                 msg.innerHTML = '⚠️ Lütfen bir <b>Görüşme Odası</b> seçiniz!';
                 msg.className = 'error';
                 msg.style.display = 'block';
-                return; // İşlemi durdur
+                return;
             }
-
             if (!saatSecimi || saatSecimi === "") {
                 msg.innerHTML = '⚠️ Lütfen bir <b>Randevu Saati</b> seçiniz!';
                 msg.className = 'error';
                 msg.style.display = 'block';
-                return; // İşlemi durdur
+                return;
             }
-            // ----------------------------------------
 
             const btn = document.getElementById('submitButton');
             btn.disabled = true;
@@ -274,12 +277,10 @@
                     msg.style.display = 'block';
                     this.reset();
                     document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
-                    
                     document.getElementById('room-liverpool').classList.add('hidden-room'); 
                     document.getElementById('room-manchester').classList.remove('hidden-room');
                     document.getElementById('room-oxford').classList.remove('hidden-room');
                     document.getElementById('room-cambridge').classList.remove('hidden-room');
-
                     timeSelect.innerHTML = '<option value="">Önce Tarih ve Oda Seçiniz</option>';
                     timeSelect.disabled = true;
                     currentBookings = [];
