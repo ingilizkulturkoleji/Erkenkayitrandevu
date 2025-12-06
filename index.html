@@ -40,6 +40,19 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #loadingText { font-weight: 500; color: var(--primary); font-size: 0.9em; margin-left: 5px; }
         #roomWarning { font-size: 0.9em; color: var(--error-text); display:none; margin-top: 8px; font-weight: 500; }
+        
+        /* Özel Kapalı Gün Mesajı Stili */
+        #closedDayMessage {
+            display: none;
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border: 1px solid #fca5a5;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +94,9 @@
                 <label>Görüşme Tarihi (1 Aralık - 1 Ocak)</label>
                 <input type="date" id="randevuTarihi" name="randevuTarihi" required>
             </div>
+            
+            <div id="closedDayMessage">⚠️ 7 Aralık Pazar günü randevu sistemimiz kapalıdır. Lütfen başka bir tarih seçiniz.</div>
+
             <div class="form-group">
                 <label>Görüşme Odası (Salon)</label>
                 <div class="room-container">
@@ -104,12 +120,15 @@
     </div>
 
     <script>
-        // SİZİN URL'NİZ
+        // SİZİN URL'NİZ (Değişiklik yapmadık, aynı kalıyor)
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
         const dateInput = document.getElementById('randevuTarihi');
         const timeSelect = document.getElementById('randevuSaati');
         const roomInput = document.getElementById('secilenOda');
+        const closedDayMessage = document.getElementById('closedDayMessage');
+        const roomContainer = document.querySelector('.room-container');
+        
         let currentBookings = []; 
 
         const currentYear = new Date().getFullYear();
@@ -128,6 +147,20 @@
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
             
+            // --- 7 ARALIK KONTROLÜ (YENİ EKLENDİ) ---
+            if (this.value === '2025-12-07') {
+                closedDayMessage.style.display = 'block'; // Uyarıyı göster
+                roomContainer.style.pointerEvents = 'none'; // Tıklamayı engelle
+                roomContainer.style.opacity = '0.5'; // Soluklaştır
+                document.getElementById('loadingText').innerHTML = ''; 
+                return; // İşlemi burada kes
+            } else {
+                closedDayMessage.style.display = 'none'; // Uyarıyı gizle
+                roomContainer.style.pointerEvents = 'auto'; // Tıklamayı aç
+                roomContainer.style.opacity = '1';
+            }
+            // ------------------------------------------
+
             // ODA YÖNETİMİ
             const selectedDate = new Date(this.value);
             const dayOfWeek = selectedDate.getDay(); 
@@ -136,12 +169,13 @@
             const roomCambridge = document.getElementById('room-cambridge');
             const roomOxford = document.getElementById('room-oxford');
 
+            // Önce hepsini görünür yap
             roomManchester.classList.remove('hidden-room');
             roomLiverpool.classList.remove('hidden-room');
             roomCambridge.classList.remove('hidden-room');
             roomOxford.classList.remove('hidden-room');
 
-            if (dayOfWeek === 0) { // PAZAR
+            if (dayOfWeek === 0) { // PAZAR (14, 21, 28 Aralık için geçerli)
                 roomManchester.classList.add('hidden-room');
                 roomOxford.classList.add('hidden-room');
             } 
@@ -179,33 +213,25 @@
             generateTimeSlots(roomName, isSunday);
         }
 
-        // --- GÜNCELLENMİŞ SAAT MANTIĞI (V9) ---
+        // --- SAAT MANTIĞI (Aynı kaldı) ---
         function generateTimeSlots(selectedRoom, isSunday) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
             
-            // Döngü 09:00 - 17:00
             for (let hour = 9; hour <= 17; hour++) {
                 for (let minute = 0; minute < 60; minute += 20) {
                     
-                    // 1. ÖĞLE ARASI (Her gün için geçerli)
-                    // 12:40 ve 13:00 kapalı.
                     if (hour === 12 && minute === 40) continue;
                     if (hour === 13 && minute === 0) continue; 
 
                     if (isSunday) {
-                        // PAZAR GÜNÜ KURALLARI
-                        // Başlangıç: 10:00 (10'dan küçük her şeyi engelle)
+                        // PAZAR GÜNÜ KURALLARI (14, 21, 28 Aralık için)
                         if (hour < 10) continue;
-
-                        // Bitiş: 16:00 (16:00'dan sonraki her şeyi engelle)
-                        // 16:00 kabul, 16:20 red.
+                        if (hour === 10 && minute < 30) continue;
                         if (hour === 16 && minute > 0) continue;
                         if (hour > 16) continue;
-
                     } else {
                         // DİĞER GÜNLER
-                        // Bitiş: 17:00 (17:00 kabul, 17:20 red)
                         if (hour === 17 && minute > 0) continue;
                         if (hour > 17) continue; 
                     }
@@ -277,10 +303,16 @@
                     msg.style.display = 'block';
                     this.reset();
                     document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+                    
+                    // Reset sonrası varsayılanları uygula
                     document.getElementById('room-liverpool').classList.add('hidden-room'); 
                     document.getElementById('room-manchester').classList.remove('hidden-room');
                     document.getElementById('room-oxford').classList.remove('hidden-room');
                     document.getElementById('room-cambridge').classList.remove('hidden-room');
+                    document.getElementById('closedDayMessage').style.display = 'none';
+                    document.querySelector('.room-container').style.pointerEvents = 'auto';
+                    document.querySelector('.room-container').style.opacity = '1';
+
                     timeSelect.innerHTML = '<option value="">Önce Tarih ve Oda Seçiniz</option>';
                     timeSelect.disabled = true;
                     currentBookings = [];
