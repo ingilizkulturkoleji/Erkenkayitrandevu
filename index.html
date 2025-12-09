@@ -41,12 +41,12 @@
         #loadingText { font-weight: 500; color: var(--primary); font-size: 0.9em; margin-left: 5px; }
         #roomWarning { font-size: 0.9em; color: var(--error-text); display:none; margin-top: 8px; font-weight: 500; }
         
-        /* Özel Kapalı Gün Mesajı Stili */
+        /* Kapalı Gün Uyarısı */
         #closedDayMessage {
             display: none;
             background-color: #fee2e2;
             color: #991b1b;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             text-align: center;
             margin-bottom: 20px;
@@ -90,12 +90,13 @@
                     <input type="tel" name="telefon" required placeholder="05XX XXX XX XX">
                 </div>
             </div>
+            
             <div class="form-group">
                 <label>Görüşme Tarihi (1 Aralık - 1 Ocak)</label>
                 <input type="date" id="randevuTarihi" name="randevuTarihi" required>
             </div>
             
-            <div id="closedDayMessage">⚠️ 7 Aralık Pazar günü randevu sistemimiz kapalıdır. Lütfen başka bir tarih seçiniz.</div>
+            <div id="closedDayMessage">⚠️ 21 Aralık Pazar günü randevu sistemimiz kapalıdır.</div>
 
             <div class="form-group">
                 <label>Görüşme Odası (Salon)</label>
@@ -120,7 +121,7 @@
     </div>
 
     <script>
-        // SİZİN URL'NİZ (Değişiklik yapmadık, aynı kalıyor)
+        // SİZİN URL'NİZ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
         const dateInput = document.getElementById('randevuTarihi');
@@ -131,11 +132,33 @@
         
         let currentBookings = []; 
 
+        // --- TARİH AYARLARI VE GEÇMİŞ TARİH ENGELLEME ---
         const currentYear = new Date().getFullYear();
         const minDate = `${currentYear}-12-01`;
         const maxDate = `${currentYear + 1}-01-01`;
-        dateInput.setAttribute('min', minDate);
+        
+        // Bugünün tarihi (YYYY-MM-DD formatında)
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Eğer bugün 1 Aralık'tan sonra ise, başlangıcı bugün yap (Geçmiş seçilemez)
+        // Eğer bugün 1 Aralık'tan önce ise, başlangıcı 1 Aralık yap.
+        const startLimit = (today > minDate) ? today : minDate;
+
+        dateInput.setAttribute('min', startLimit);
         dateInput.setAttribute('max', maxDate);
+        // ----------------------------------------------------
+
+        // --- ÖZEL KAPALI GÜNLER LİSTESİ ---
+        const closedDates = [
+            '2025-12-07', // Geçmiş Pazar (Opsiyonel, zaten minDate ile engellenebilir)
+            '2025-12-21'  // 21 ARALIK PAZAR KAPALI
+        ];
+
+        // --- AÇIK OLAN PAZARLAR LİSTESİ ---
+        const openSundays = [
+            '2025-12-14',
+            '2025-12-28'
+        ];
 
         dateInput.addEventListener('change', async function() {
             if (!this.value) return;
@@ -147,42 +170,61 @@
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
             
-            // --- 7 ARALIK KONTROLÜ (YENİ EKLENDİ) ---
-            if (this.value === '2025-12-07') {
-                closedDayMessage.style.display = 'block'; // Uyarıyı göster
-                roomContainer.style.pointerEvents = 'none'; // Tıklamayı engelle
-                roomContainer.style.opacity = '0.5'; // Soluklaştır
+            // --- KAPALI GÜN KONTROLÜ (21 ARALIK) ---
+            if (closedDates.includes(this.value)) {
+                closedDayMessage.style.display = 'block'; 
+                roomContainer.style.pointerEvents = 'none'; 
+                roomContainer.style.opacity = '0.5'; 
                 document.getElementById('loadingText').innerHTML = ''; 
-                return; // İşlemi burada kes
+                return; 
             } else {
-                closedDayMessage.style.display = 'none'; // Uyarıyı gizle
-                roomContainer.style.pointerEvents = 'auto'; // Tıklamayı aç
+                closedDayMessage.style.display = 'none'; 
+                roomContainer.style.pointerEvents = 'auto'; 
                 roomContainer.style.opacity = '1';
             }
-            // ------------------------------------------
-
+            
             // ODA YÖNETİMİ
             const selectedDate = new Date(this.value);
             const dayOfWeek = selectedDate.getDay(); 
+            const dateString = this.value;
+
             const roomManchester = document.getElementById('room-manchester');
             const roomLiverpool = document.getElementById('room-liverpool');
             const roomCambridge = document.getElementById('room-cambridge');
             const roomOxford = document.getElementById('room-oxford');
 
-            // Önce hepsini görünür yap
+            // Varsayılan: Hepsi AÇIK
             roomManchester.classList.remove('hidden-room');
             roomLiverpool.classList.remove('hidden-room');
             roomCambridge.classList.remove('hidden-room');
             roomOxford.classList.remove('hidden-room');
 
-            if (dayOfWeek === 0) { // PAZAR (14, 21, 28 Aralık için geçerli)
-                roomManchester.classList.add('hidden-room');
-                roomOxford.classList.add('hidden-room');
+            // --- PAZAR GÜNÜ MANTIĞI ---
+            if (dayOfWeek === 0) { 
+                // Eğer açık pazar listesindeyse (14 veya 28)
+                if (openSundays.includes(dateString)) {
+                    // Sadece Oxford ve Liverpool açık mı olsun? 
+                    // İsteğiniz: "Pazar günleri oda sayısı 3 olmalı" demiştiniz ama 
+                    // sonra "Sadece 21 Aralık kapalı" dediniz.
+                    // Varsayılan Pazar Kuralını uyguluyoruz: 
+                    // Manchester ve Oxford kapalıydı (Önceki istek), Liverpool ve Cambridge açıktı.
+                    // Veya son istekte Oxford açık denmişti.
+                    
+                    // GÜNCEL PAZAR KURALI: 
+                    // Manchester ve Oxford GİZLİ (3 oda kuralı için birini daha açmalıyız veya Oxford açılmalı)
+                    // Önceki isteğinizde Oxford AÇIK olsun demiştiniz.
+                    // Şöyle yapalım: Manchester GİZLİ, Diğerleri AÇIK (3 Oda)
+                    roomManchester.classList.add('hidden-room');
+                    // roomOxford.classList.add('hidden-room'); // Oxford'u açtım
+                } else {
+                    // Listede olmayan Pazar (zaten kapalı gün kontrolü yukarıda yapıldı)
+                }
             } 
-            else if (dayOfWeek === 6) { // CUMARTESİ (Hepsi açık)
+            else if (dayOfWeek === 6) { // CUMARTESİ
+                // Hepsi açık
             } 
             else { // HAFTA İÇİ
-                roomLiverpool.classList.add('hidden-room');
+                roomLiverpool.classList.add('hidden-room'); // Hafta içi Liverpool kapalı
             }
 
             document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Kontrol ediliyor...';
@@ -213,7 +255,7 @@
             generateTimeSlots(roomName, isSunday);
         }
 
-        // --- SAAT MANTIĞI (Aynı kaldı) ---
+        // --- SAAT MANTIĞI ---
         function generateTimeSlots(selectedRoom, isSunday) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
@@ -225,13 +267,13 @@
                     if (hour === 13 && minute === 0) continue; 
 
                     if (isSunday) {
-                        // PAZAR GÜNÜ KURALLARI (14, 21, 28 Aralık için)
+                        // Pazar: 10:30 - 16:30
                         if (hour < 10) continue;
                         if (hour === 10 && minute < 30) continue;
                         if (hour === 16 && minute > 0) continue;
                         if (hour > 16) continue;
                     } else {
-                        // DİĞER GÜNLER
+                        // Diğer: 09:00 - 17:00
                         if (hour === 17 && minute > 0) continue;
                         if (hour > 17) continue; 
                     }
@@ -304,7 +346,6 @@
                     this.reset();
                     document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
                     
-                    // Reset sonrası varsayılanları uygula
                     document.getElementById('room-liverpool').classList.add('hidden-room'); 
                     document.getElementById('room-manchester').classList.remove('hidden-room');
                     document.getElementById('room-oxford').classList.remove('hidden-room');
