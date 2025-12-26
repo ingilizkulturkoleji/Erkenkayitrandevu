@@ -12,7 +12,6 @@
 --primary:#2563eb;--primary-dark:#1d4ed8;--primary-soft:#dbeafe;
 --text-dark:#1e293b;--text-muted:#64748b;
 --border-light:#e2e8f0;
---error-bg:#fee2e2;--error-text:#991b1b;
 }
 
 body{
@@ -30,7 +29,7 @@ width:100%;max-width:560px
 .logo{max-width:160px;margin:0 auto 20px;display:block}
 h2{text-align:center;font-family:Poppins,sans-serif;margin-bottom:10px}
 
-/* ⏳ GERİ SAYIM */
+/* GERİ SAYIM */
 .countdown{
 background:var(--primary-soft);
 border:2px dashed var(--primary);
@@ -40,44 +39,26 @@ text-align:center;
 margin-bottom:25px;
 transition:.3s
 }
-
-/* 🔴 SON 24 SAAT */
 .countdown.alert{
 background:#fee2e2;
 border-color:#dc2626;
 animation:pulse 1.2s infinite
 }
-.countdown.alert .countdown-title{
-color:#dc2626
-}
-.countdown.alert .countdown-time{
-color:#7f1d1d;
-font-weight:800
-}
-
 @keyframes pulse{
 0%{transform:scale(1)}
 50%{transform:scale(1.02)}
 100%{transform:scale(1)}
 }
+.countdown-title{font-weight:700;margin-bottom:8px}
+.countdown.alert .countdown-title{color:#dc2626}
+.countdown-time{font-weight:700}
 
-.countdown-title{
-font-weight:700;color:var(--primary-dark);margin-bottom:8px
-}
-.countdown-time{
-font-size:1.1rem;font-weight:600;color:var(--text-dark)
-}
-
-/* 🔒 FORM KİLİT */
+/* KİLİT */
 .form-locked{pointer-events:none;opacity:.55}
 .lock-message{
-background:#fee2e2;
-color:#991b1b;
-padding:14px;
-border-radius:12px;
-text-align:center;
-font-weight:700;
-margin-bottom:20px
+background:#fee2e2;color:#991b1b;
+padding:14px;border-radius:12px;
+text-align:center;font-weight:700;margin-bottom:20px
 }
 
 .form-group{margin-bottom:18px}
@@ -100,41 +81,26 @@ gap:10px
 .room-card{
 border:2px solid var(--border-light);
 border-radius:12px;
-padding:12px;
-text-align:center;
-cursor:pointer;
-font-weight:600;
-color:var(--text-muted)
+padding:12px;text-align:center;
+cursor:pointer;font-weight:600;color:var(--text-muted)
 }
-
 .room-card.selected{
 background:linear-gradient(135deg,var(--primary),var(--primary-dark));
 color:#fff;border-color:transparent
 }
 
 button{
-width:100%;
-padding:16px;
-border:none;
+width:100%;padding:16px;border:none;
 border-radius:14px;
 background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-color:#fff;
-font-size:16px;
-font-weight:600;
-cursor:pointer
+color:#fff;font-size:16px;font-weight:600
 }
-
 button:disabled{background:#e5e7eb;color:#94a3b8}
 
 #closedDayMessage{
-display:none;
-background:#fee2e2;
-color:#991b1b;
-padding:10px;
-border-radius:10px;
-text-align:center;
-font-weight:600;
-margin-bottom:15px
+display:none;background:#fee2e2;color:#991b1b;
+padding:10px;border-radius:10px;
+text-align:center;font-weight:600;margin-bottom:15px
 }
 </style>
 </head>
@@ -154,6 +120,7 @@ margin-bottom:15px
 </div>
 
 <form id="appointmentForm">
+
 <div class="form-group"><label>Veli Adı Soyadı</label><input required></div>
 <div class="form-group"><label>Öğrenci Adı Soyadı</label><input required></div>
 
@@ -184,11 +151,11 @@ margin-bottom:15px
 
 <div class="form-group">
 <label>Görüşme Odası</label>
-<div class="room-container">
-<div class="room-card" onclick="selectRoom()">Manchester</div>
-<div class="room-card" onclick="selectRoom()">Liverpool</div>
-<div class="room-card" onclick="selectRoom()">Cambridge</div>
-<div class="room-card" onclick="selectRoom()">Oxford</div>
+<div class="room-container" id="roomContainer">
+<div class="room-card" onclick="selectRoom(this)">Manchester</div>
+<div class="room-card" onclick="selectRoom(this)">Liverpool</div>
+<div class="room-card" onclick="selectRoom(this)">Cambridge</div>
+<div class="room-card" onclick="selectRoom(this)">Oxford</div>
 </div>
 </div>
 
@@ -199,59 +166,76 @@ margin-bottom:15px
 </select>
 </div>
 
-<button>Randevuyu Onayla</button>
+<button id="submitBtn">Randevuyu Onayla</button>
 </form>
 </div>
 
 <script>
+/* 🔴 GERİ SAYIM + KİLİT */
 const endDate = new Date("2025-12-31T18:00:00").getTime();
-const countdownBox=document.getElementById("countdownBox");
-const countdownTitle=document.getElementById("countdownTitle");
-const timer=document.getElementById("countdownTimer");
-const form=document.getElementById("appointmentForm");
-const lockMsg=document.getElementById("lockMessage");
+const countdownBox = document.getElementById("countdownBox");
+const countdownTitle = document.getElementById("countdownTitle");
+const timer = document.getElementById("countdownTimer");
+const form = document.getElementById("appointmentForm");
+const lockMsg = document.getElementById("lockMessage");
 
 function lockForm(){
 form.classList.add("form-locked");
-form.querySelectorAll("input,select,button").forEach(el=>el.disabled=true);
+form.querySelectorAll("input,select,button").forEach(e=>e.disabled=true);
 lockMsg.style.display="block";
 }
 
 setInterval(()=>{
-const now=Date.now();
-const diff=endDate-now;
-
-if(diff<=0){
-timer.innerHTML="❌ Kampanya sona erdi";
-lockForm();
-return;
-}
-
+const diff=endDate-Date.now();
+if(diff<=0){timer.innerHTML="❌ Kampanya sona erdi";lockForm();return;}
 if(diff<=86400000){
 countdownBox.classList.add("alert");
 countdownTitle.innerHTML="🚨 SON 24 SAAT! Kaçırmayın";
 }
-
-const d=Math.floor(diff/86400000);
-const h=Math.floor(diff%86400000/3600000);
-const m=Math.floor(diff%3600000/60000);
-const s=Math.floor(diff%60000/1000);
-
+const d=Math.floor(diff/86400000),
+h=Math.floor(diff%86400000/3600000),
+m=Math.floor(diff%3600000/60000),
+s=Math.floor(diff%60000/1000);
 timer.innerHTML=`${d} Gün ${h} Saat ${m} Dakika ${s} Saniye`;
 },1000);
 
-/* GEÇMİŞ TARİHLER */
-document.getElementById("randevuTarihi").min=new Date().toISOString().split("T")[0];
+/* 📅 TARİH KONTROL */
+const closedDates=["2025-12-28"];
+const dateInput=document.getElementById("randevuTarihi");
+const closedMsg=document.getElementById("closedDayMessage");
+const roomContainer=document.getElementById("roomContainer");
+const timeSelect=document.getElementById("randevuSaati");
 
-function selectRoom(){
-const sel=document.getElementById("randevuSaati");
-sel.innerHTML="";
+dateInput.min=new Date().toISOString().split("T")[0];
+
+dateInput.addEventListener("change",()=>{
+timeSelect.disabled=true;
+timeSelect.innerHTML="<option>Önce Tarih ve Oda Seçiniz</option>";
+roomContainer.style.pointerEvents="none";
+roomContainer.style.opacity="0.5";
+
+if(closedDates.includes(dateInput.value)){
+closedMsg.style.display="block";
+setTimeout(()=>dateInput.value="",50);
+}else{
+closedMsg.style.display="none";
+roomContainer.style.pointerEvents="auto";
+roomContainer.style.opacity="1";
+}
+});
+
+/* 🏫 ODA + SAAT */
+function selectRoom(el){
+document.querySelectorAll(".room-card").forEach(c=>c.classList.remove("selected"));
+el.classList.add("selected");
+
+timeSelect.innerHTML="";
 for(let h=9;h<=17;h++){
 for(let m=0;m<60;m+=20){
 if(h===17&&m>0)continue;
-sel.innerHTML+=`<option>${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}</option>`;
+timeSelect.innerHTML+=`<option>${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}</option>`;
 }}
-sel.disabled=false;
+timeSelect.disabled=false;
 }
 </script>
 </body>
