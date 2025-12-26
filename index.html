@@ -10,9 +10,9 @@
 <style>
 :root{
 --primary:#2563eb;--primary-dark:#1d4ed8;--primary-soft:#dbeafe;
---text-dark:#1e293b;--text-muted:#64748b;--bg-body:#f0f5ff;
---border-light:#e2e8f0;--error-bg:#fee2e2;--error-text:#991b1b;
---success-bg:#d1fae5;--success-text:#065f46;
+--text-dark:#1e293b;--text-muted:#64748b;
+--border-light:#e2e8f0;
+--error-bg:#fee2e2;--error-text:#991b1b;
 }
 
 body{
@@ -30,20 +30,54 @@ width:100%;max-width:560px
 .logo{max-width:160px;margin:0 auto 20px;display:block}
 h2{text-align:center;font-family:Poppins,sans-serif;margin-bottom:10px}
 
-/* 🔔 GERİ SAYIM */
+/* ⏳ GERİ SAYIM */
 .countdown{
 background:var(--primary-soft);
 border:2px dashed var(--primary);
 border-radius:14px;
 padding:15px;
 text-align:center;
-margin-bottom:25px
+margin-bottom:25px;
+transition:.3s
 }
+
+/* 🔴 SON 24 SAAT */
+.countdown.alert{
+background:#fee2e2;
+border-color:#dc2626;
+animation:pulse 1.2s infinite
+}
+.countdown.alert .countdown-title{
+color:#dc2626
+}
+.countdown.alert .countdown-time{
+color:#7f1d1d;
+font-weight:800
+}
+
+@keyframes pulse{
+0%{transform:scale(1)}
+50%{transform:scale(1.02)}
+100%{transform:scale(1)}
+}
+
 .countdown-title{
 font-weight:700;color:var(--primary-dark);margin-bottom:8px
 }
 .countdown-time{
 font-size:1.1rem;font-weight:600;color:var(--text-dark)
+}
+
+/* 🔒 FORM KİLİT */
+.form-locked{pointer-events:none;opacity:.55}
+.lock-message{
+background:#fee2e2;
+color:#991b1b;
+padding:14px;
+border-radius:12px;
+text-align:center;
+font-weight:700;
+margin-bottom:20px
 }
 
 .form-group{margin-bottom:18px}
@@ -102,17 +136,6 @@ text-align:center;
 font-weight:600;
 margin-bottom:15px
 }
-
-#statusMessage{
-display:none;
-margin-top:15px;
-padding:12px;
-border-radius:10px;
-font-weight:600;
-text-align:center
-}
-.success{background:var(--success-bg);color:var(--success-text)}
-.error{background:var(--error-bg);color:var(--error-text)}
 </style>
 </head>
 
@@ -121,28 +144,23 @@ text-align:center
 <img src="https://i.hizliresim.com/6eldhh1.png" class="logo">
 <h2>Erken Kayıt Randevusu</h2>
 
-<!-- 🔔 GERİ SAYIM -->
-<div class="countdown">
-<div class="countdown-title">⏳ Erken Kayıt Fırsatı Bitiyor!</div>
-<div class="countdown-time" id="countdownTimer">Yükleniyor...</div>
+<div id="countdownBox" class="countdown">
+<div id="countdownTitle" class="countdown-title">⏳ Erken Kayıt Fırsatı Bitiyor!</div>
+<div id="countdownTimer" class="countdown-time">Yükleniyor...</div>
+</div>
+
+<div id="lockMessage" class="lock-message" style="display:none;">
+❌ Erken kayıt kampanyası sona ermiştir.
 </div>
 
 <form id="appointmentForm">
-
-<div class="form-group">
-<label>Veli Adı Soyadı</label>
-<input name="veliAdiSoyadi" required>
-</div>
-
-<div class="form-group">
-<label>Öğrenci Adı Soyadı</label>
-<input name="ogrenciAdiSoyadi" required>
-</div>
+<div class="form-group"><label>Veli Adı Soyadı</label><input required></div>
+<div class="form-group"><label>Öğrenci Adı Soyadı</label><input required></div>
 
 <div class="form-group flex-group">
 <div>
 <label>Öğrenci Sınıfı</label>
-<select name="ogrenciSinifi" required>
+<select required>
 <option value="">Seçiniz</option>
 <option>Anaokulu</option><option>1. Sınıf</option>
 <option>2. Sınıf</option><option>3. Sınıf</option>
@@ -153,104 +171,87 @@ text-align:center
 </div>
 <div>
 <label>Telefon</label>
-<input name="telefon" required>
+<input required>
 </div>
 </div>
 
 <div class="form-group">
 <label>Görüşme Tarihi</label>
-<input type="date" id="randevuTarihi" name="randevuTarihi" required>
+<input type="date" id="randevuTarihi" required>
 </div>
 
-<div id="closedDayMessage">
-⚠️ 28 Aralık Pazar günü randevu sistemimiz kapalıdır.
-</div>
+<div id="closedDayMessage">⚠️ 28 Aralık Pazar günü randevu sistemimiz kapalıdır.</div>
 
 <div class="form-group">
 <label>Görüşme Odası</label>
 <div class="room-container">
-<div class="room-card" onclick="selectRoom('Manchester',this)">Manchester</div>
-<div class="room-card" onclick="selectRoom('Liverpool',this)">Liverpool</div>
-<div class="room-card" onclick="selectRoom('Cambridge',this)">Cambridge</div>
-<div class="room-card" onclick="selectRoom('Oxford',this)">Oxford</div>
+<div class="room-card" onclick="selectRoom()">Manchester</div>
+<div class="room-card" onclick="selectRoom()">Liverpool</div>
+<div class="room-card" onclick="selectRoom()">Cambridge</div>
+<div class="room-card" onclick="selectRoom()">Oxford</div>
 </div>
-<input type="hidden" id="secilenOda" name="secilenOda">
 </div>
 
 <div class="form-group">
 <label>Randevu Saati</label>
-<select id="randevuSaati" name="randevuSaati" disabled required>
+<select id="randevuSaati" disabled>
 <option>Önce Tarih ve Oda Seçiniz</option>
 </select>
 </div>
 
-<button id="submitButton">Randevuyu Onayla</button>
-<div id="statusMessage"></div>
+<button>Randevuyu Onayla</button>
 </form>
 </div>
 
 <script>
-/* 🔔 GERİ SAYIM SAYAÇ */
-const endDate = new Date("2026-01-31T18:00:00").getTime();
-const timer = document.getElementById("countdownTimer");
+const endDate = new Date("2025-12-31T18:00:00").getTime();
+const countdownBox=document.getElementById("countdownBox");
+const countdownTitle=document.getElementById("countdownTitle");
+const timer=document.getElementById("countdownTimer");
+const form=document.getElementById("appointmentForm");
+const lockMsg=document.getElementById("lockMessage");
+
+function lockForm(){
+form.classList.add("form-locked");
+form.querySelectorAll("input,select,button").forEach(el=>el.disabled=true);
+lockMsg.style.display="block";
+}
 
 setInterval(()=>{
-const now = new Date().getTime();
-const diff = endDate - now;
+const now=Date.now();
+const diff=endDate-now;
 
-if(diff <= 0){
-timer.innerHTML = "❌ Erken kayıt kampanyası sona erdi.";
+if(diff<=0){
+timer.innerHTML="❌ Kampanya sona erdi";
+lockForm();
 return;
 }
 
-const d = Math.floor(diff / (1000*60*60*24));
-const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-const m = Math.floor((diff%(1000*60*60))/(1000*60));
-const s = Math.floor((diff%(1000*60))/1000);
+if(diff<=86400000){
+countdownBox.classList.add("alert");
+countdownTitle.innerHTML="🚨 SON 24 SAAT! Kaçırmayın";
+}
 
-timer.innerHTML = `${d} Gün ${h} Saat ${m} Dakika ${s} Saniye`;
+const d=Math.floor(diff/86400000);
+const h=Math.floor(diff%86400000/3600000);
+const m=Math.floor(diff%3600000/60000);
+const s=Math.floor(diff%60000/1000);
+
+timer.innerHTML=`${d} Gün ${h} Saat ${m} Dakika ${s} Saniye`;
 },1000);
 
-/* 🔒 KAPALI TARİHLER */
-const closedDates=["2025-12-21","2025-12-28"];
-const dateInput=document.getElementById("randevuTarihi");
-const roomContainer=document.querySelector(".room-container");
-const closedMsg=document.getElementById("closedDayMessage");
-const timeSelect=document.getElementById("randevuSaati");
-const roomInput=document.getElementById("secilenOda");
+/* GEÇMİŞ TARİHLER */
+document.getElementById("randevuTarihi").min=new Date().toISOString().split("T")[0];
 
-dateInput.addEventListener("change",()=>{
-timeSelect.disabled=true;
-timeSelect.innerHTML="<option>Önce Tarih ve Oda Seçiniz</option>";
-roomInput.value="";
-document.querySelectorAll(".room-card").forEach(r=>r.classList.remove("selected"));
-
-if(closedDates.includes(dateInput.value)){
-closedMsg.style.display="block";
-roomContainer.style.pointerEvents="none";
-roomContainer.style.opacity="0.5";
-}else{
-closedMsg.style.display="none";
-roomContainer.style.pointerEvents="auto";
-roomContainer.style.opacity="1";
-}
-});
-
-function selectRoom(room,el){
-if(!dateInput.value)return;
-document.querySelectorAll(".room-card").forEach(r=>r.classList.remove("selected"));
-el.classList.add("selected");
-roomInput.value=room;
-timeSelect.innerHTML="";
+function selectRoom(){
+const sel=document.getElementById("randevuSaati");
+sel.innerHTML="";
 for(let h=9;h<=17;h++){
 for(let m=0;m<60;m+=20){
-if(h===17 && m>0)continue;
-const t=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
-const o=document.createElement("option");
-o.value=t;o.textContent=t;
-timeSelect.appendChild(o);
+if(h===17&&m>0)continue;
+sel.innerHTML+=`<option>${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}</option>`;
 }}
-timeSelect.disabled=false;
+sel.disabled=false;
 }
 </script>
 </body>
