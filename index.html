@@ -1,218 +1,256 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erken Kayıt Randevu Sistemi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erken Kayıt Randevu Sistemi</title>
 
-    <style>
-        :root {
-            --primary:#2563eb;--primary-dark:#1d4ed8;--primary-soft:#dbeafe;
-            --text-dark:#1e293b;--text-muted:#64748b;--bg-body:#f0f5ff;
-            --bg-card:#fff;--border-light:#e2e8f0;
-            --success-bg:#d1fae5;--success-text:#065f46;
-            --error-bg:#fee2e2;--error-text:#991b1b;
-            --shadow-soft:0 10px 30px -5px rgba(37,99,235,.1),0 4px 10px -3px rgba(0,0,0,.05);
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
-        body{
-            font-family:'Inter',sans-serif;
-            background:linear-gradient(to bottom right,#f0f5ff,#e0eaff);
-            display:flex;justify-content:center;align-items:center;
-            min-height:100vh;margin:0;padding:20px;color:var(--text-dark)
-        }
+<style>
+:root{
+--primary:#2563eb;--primary-dark:#1d4ed8;--primary-soft:#dbeafe;
+--text-dark:#1e293b;--text-muted:#64748b;--bg-body:#f0f5ff;
+--border-light:#e2e8f0;--error-bg:#fee2e2;--error-text:#991b1b;
+--success-bg:#d1fae5;--success-text:#065f46;
+}
 
-        .container{
-            background:#fff;padding:40px;border-radius:24px;
-            box-shadow:var(--shadow-soft);width:100%;max-width:550px
-        }
+body{
+font-family:Inter,sans-serif;
+background:linear-gradient(to bottom right,#f0f5ff,#e0eaff);
+display:flex;justify-content:center;align-items:center;
+min-height:100vh;margin:0;padding:20px
+}
 
-        .logo{max-width:160px;margin:0 auto 25px;display:block}
-        h2{text-align:center;font-family:'Poppins',sans-serif;margin-bottom:30px}
+.container{
+background:#fff;padding:40px;border-radius:24px;
+width:100%;max-width:560px
+}
 
-        .form-group{margin-bottom:22px}
-        label{font-weight:600;margin-bottom:8px;display:block}
+.logo{max-width:160px;margin:0 auto 20px;display:block}
+h2{text-align:center;font-family:Poppins,sans-serif;margin-bottom:10px}
 
-        input,select{
-            width:100%;padding:14px;border:2px solid var(--border-light);
-            border-radius:12px;background:#f8fafc;font-size:15px
-        }
+/* 🔔 GERİ SAYIM */
+.countdown{
+background:var(--primary-soft);
+border:2px dashed var(--primary);
+border-radius:14px;
+padding:15px;
+text-align:center;
+margin-bottom:25px
+}
+.countdown-title{
+font-weight:700;color:var(--primary-dark);margin-bottom:8px
+}
+.countdown-time{
+font-size:1.1rem;font-weight:600;color:var(--text-dark)
+}
 
-        input:focus,select:focus{
-            border-color:var(--primary);
-            box-shadow:0 0 0 4px var(--primary-soft);
-            outline:none;background:#fff
-        }
+.form-group{margin-bottom:18px}
+label{font-weight:600;display:block;margin-bottom:6px}
 
-        .flex-group{display:flex;gap:15px}
-        .flex-group>div{flex:1}
+input,select{
+width:100%;padding:14px;border:2px solid var(--border-light);
+border-radius:12px;background:#f8fafc
+}
 
-        .room-container{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
-            gap:12px
-        }
+.flex-group{display:flex;gap:12px}
+.flex-group>div{flex:1}
 
-        .room-card{
-            border:2px solid var(--border-light);
-            border-radius:12px;padding:14px;
-            text-align:center;cursor:pointer;
-            font-weight:600;color:var(--text-muted)
-        }
+.room-container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
+gap:10px
+}
 
-        .room-card.selected{
-            background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-            color:#fff;border-color:transparent
-        }
+.room-card{
+border:2px solid var(--border-light);
+border-radius:12px;
+padding:12px;
+text-align:center;
+cursor:pointer;
+font-weight:600;
+color:var(--text-muted)
+}
 
-        .hidden-room{display:none!important}
+.room-card.selected{
+background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+color:#fff;border-color:transparent
+}
 
-        button{
-            width:100%;padding:18px;border:none;
-            background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-            color:#fff;font-size:17px;font-weight:600;
-            border-radius:14px;cursor:pointer;margin-top:10px
-        }
+button{
+width:100%;
+padding:16px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+color:#fff;
+font-size:16px;
+font-weight:600;
+cursor:pointer
+}
 
-        button:disabled{background:#e5e7eb;color:#94a3b8}
+button:disabled{background:#e5e7eb;color:#94a3b8}
 
-        #statusMessage{
-            display:none;margin-top:20px;
-            padding:14px;border-radius:10px;font-weight:600;text-align:center
-        }
+#closedDayMessage{
+display:none;
+background:#fee2e2;
+color:#991b1b;
+padding:10px;
+border-radius:10px;
+text-align:center;
+font-weight:600;
+margin-bottom:15px
+}
 
-        .success{background:var(--success-bg);color:var(--success-text)}
-        .error{background:var(--error-bg);color:var(--error-text)}
-
-        #closedDayMessage{
-            display:none;
-            background:#fee2e2;
-            color:#991b1b;
-            padding:12px;
-            border-radius:8px;
-            text-align:center;
-            margin-bottom:20px;
-            font-weight:600
-        }
-    </style>
+#statusMessage{
+display:none;
+margin-top:15px;
+padding:12px;
+border-radius:10px;
+font-weight:600;
+text-align:center
+}
+.success{background:var(--success-bg);color:var(--success-text)}
+.error{background:var(--error-bg);color:var(--error-text)}
+</style>
 </head>
 
 <body>
 <div class="container">
-    <img src="https://i.hizliresim.com/6eldhh1.png" class="logo">
-    <h2>Erken Kayıt Randevusu</h2>
+<img src="https://i.hizliresim.com/6eldhh1.png" class="logo">
+<h2>Erken Kayıt Randevusu</h2>
 
-    <form id="appointmentForm">
+<!-- 🔔 GERİ SAYIM -->
+<div class="countdown">
+<div class="countdown-title">⏳ Erken Kayıt Fırsatı Bitiyor!</div>
+<div class="countdown-time" id="countdownTimer">Yükleniyor...</div>
+</div>
 
-        <div class="form-group">
-            <label>Veli Adı Soyadı</label>
-            <input name="veliAdiSoyadi" required>
-        </div>
+<form id="appointmentForm">
 
-        <div class="form-group">
-            <label>Öğrenci Adı Soyadı</label>
-            <input name="ogrenciAdiSoyadi" required>
-        </div>
+<div class="form-group">
+<label>Veli Adı Soyadı</label>
+<input name="veliAdiSoyadi" required>
+</div>
 
-        <div class="form-group flex-group">
-            <div>
-                <label>Öğrenci Sınıfı</label>
-                <select name="ogrenciSinifi" required>
-                    <option value="">Seçiniz</option>
-                    <option>Anaokulu</option><option>1. Sınıf</option>
-                    <option>2. Sınıf</option><option>3. Sınıf</option>
-                    <option>4. Sınıf</option><option>5. Sınıf</option>
-                    <option>6. Sınıf</option><option>7. Sınıf</option>
-                    <option>8. Sınıf</option>
-                </select>
-            </div>
-            <div>
-                <label>Telefon</label>
-                <input name="telefon" required>
-            </div>
-        </div>
+<div class="form-group">
+<label>Öğrenci Adı Soyadı</label>
+<input name="ogrenciAdiSoyadi" required>
+</div>
 
-        <div class="form-group">
-            <label>Görüşme Tarihi</label>
-            <input type="date" id="randevuTarihi" name="randevuTarihi" required>
-        </div>
+<div class="form-group flex-group">
+<div>
+<label>Öğrenci Sınıfı</label>
+<select name="ogrenciSinifi" required>
+<option value="">Seçiniz</option>
+<option>Anaokulu</option><option>1. Sınıf</option>
+<option>2. Sınıf</option><option>3. Sınıf</option>
+<option>4. Sınıf</option><option>5. Sınıf</option>
+<option>6. Sınıf</option><option>7. Sınıf</option>
+<option>8. Sınıf</option>
+</select>
+</div>
+<div>
+<label>Telefon</label>
+<input name="telefon" required>
+</div>
+</div>
 
-        <div id="closedDayMessage">
-            ⚠️ 28 Aralık Pazar günü randevu sistemimiz kapalıdır.
-        </div>
+<div class="form-group">
+<label>Görüşme Tarihi</label>
+<input type="date" id="randevuTarihi" name="randevuTarihi" required>
+</div>
 
-        <div class="form-group">
-            <label>Görüşme Odası</label>
-            <div class="room-container">
-                <div class="room-card" onclick="selectRoom('Manchester',this)">Manchester</div>
-                <div class="room-card" onclick="selectRoom('Liverpool',this)">Liverpool</div>
-                <div class="room-card" onclick="selectRoom('Cambridge',this)">Cambridge</div>
-                <div class="room-card" onclick="selectRoom('Oxford',this)">Oxford</div>
-            </div>
-            <input type="hidden" id="secilenOda" name="secilenOda">
-        </div>
+<div id="closedDayMessage">
+⚠️ 28 Aralık Pazar günü randevu sistemimiz kapalıdır.
+</div>
 
-        <div class="form-group">
-            <label>Randevu Saati</label>
-            <select id="randevuSaati" name="randevuSaati" disabled required>
-                <option>Önce Tarih ve Oda Seçiniz</option>
-            </select>
-        </div>
+<div class="form-group">
+<label>Görüşme Odası</label>
+<div class="room-container">
+<div class="room-card" onclick="selectRoom('Manchester',this)">Manchester</div>
+<div class="room-card" onclick="selectRoom('Liverpool',this)">Liverpool</div>
+<div class="room-card" onclick="selectRoom('Cambridge',this)">Cambridge</div>
+<div class="room-card" onclick="selectRoom('Oxford',this)">Oxford</div>
+</div>
+<input type="hidden" id="secilenOda" name="secilenOda">
+</div>
 
-        <button id="submitButton">Randevuyu Onayla</button>
-        <div id="statusMessage"></div>
-    </form>
+<div class="form-group">
+<label>Randevu Saati</label>
+<select id="randevuSaati" name="randevuSaati" disabled required>
+<option>Önce Tarih ve Oda Seçiniz</option>
+</select>
+</div>
+
+<button id="submitButton">Randevuyu Onayla</button>
+<div id="statusMessage"></div>
+</form>
 </div>
 
 <script>
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
+/* 🔔 GERİ SAYIM SAYAÇ */
+const endDate = new Date("2026-01-31T18:00:00").getTime();
+const timer = document.getElementById("countdownTimer");
 
-const closedDates=['2025-12-21','2025-12-28']; // 🔒 28 ARALIK KAPALI
-const openSundays=['2025-12-14'];             // ✅ SADECE 14 ARALIK AÇIK
+setInterval(()=>{
+const now = new Date().getTime();
+const diff = endDate - now;
 
-const dateInput=document.getElementById('randevuTarihi');
-const roomContainer=document.querySelector('.room-container');
-const closedMsg=document.getElementById('closedDayMessage');
-const timeSelect=document.getElementById('randevuSaati');
-const roomInput=document.getElementById('secilenOda');
+if(diff <= 0){
+timer.innerHTML = "❌ Erken kayıt kampanyası sona erdi.";
+return;
+}
 
-dateInput.addEventListener('change',()=>{
-    const date=dateInput.value;
-    timeSelect.disabled=true;
-    timeSelect.innerHTML='<option>Önce Tarih ve Oda Seçiniz</option>';
-    roomInput.value='';
-    document.querySelectorAll('.room-card').forEach(r=>r.classList.remove('selected'));
+const d = Math.floor(diff / (1000*60*60*24));
+const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+const m = Math.floor((diff%(1000*60*60))/(1000*60));
+const s = Math.floor((diff%(1000*60))/1000);
 
-    if(closedDates.includes(date)){
-        closedMsg.style.display='block';
-        roomContainer.style.pointerEvents='none';
-        roomContainer.style.opacity='0.5';
-        return;
-    }
+timer.innerHTML = `${d} Gün ${h} Saat ${m} Dakika ${s} Saniye`;
+},1000);
 
-    closedMsg.style.display='none';
-    roomContainer.style.pointerEvents='auto';
-    roomContainer.style.opacity='1';
+/* 🔒 KAPALI TARİHLER */
+const closedDates=["2025-12-21","2025-12-28"];
+const dateInput=document.getElementById("randevuTarihi");
+const roomContainer=document.querySelector(".room-container");
+const closedMsg=document.getElementById("closedDayMessage");
+const timeSelect=document.getElementById("randevuSaati");
+const roomInput=document.getElementById("secilenOda");
+
+dateInput.addEventListener("change",()=>{
+timeSelect.disabled=true;
+timeSelect.innerHTML="<option>Önce Tarih ve Oda Seçiniz</option>";
+roomInput.value="";
+document.querySelectorAll(".room-card").forEach(r=>r.classList.remove("selected"));
+
+if(closedDates.includes(dateInput.value)){
+closedMsg.style.display="block";
+roomContainer.style.pointerEvents="none";
+roomContainer.style.opacity="0.5";
+}else{
+closedMsg.style.display="none";
+roomContainer.style.pointerEvents="auto";
+roomContainer.style.opacity="1";
+}
 });
 
 function selectRoom(room,el){
-    if(!dateInput.value)return;
-    document.querySelectorAll('.room-card').forEach(r=>r.classList.remove('selected'));
-    el.classList.add('selected');
-    roomInput.value=room;
-
-    timeSelect.innerHTML='';
-    for(let h=9;h<=17;h++){
-        for(let m=0;m<60;m+=20){
-            if(h===17 && m>0)continue;
-            const t=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-            const o=document.createElement('option');
-            o.value=t;o.textContent=t;
-            timeSelect.appendChild(o);
-        }
-    }
-    timeSelect.disabled=false;
+if(!dateInput.value)return;
+document.querySelectorAll(".room-card").forEach(r=>r.classList.remove("selected"));
+el.classList.add("selected");
+roomInput.value=room;
+timeSelect.innerHTML="";
+for(let h=9;h<=17;h++){
+for(let m=0;m<60;m+=20){
+if(h===17 && m>0)continue;
+const t=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+const o=document.createElement("option");
+o.value=t;o.textContent=t;
+timeSelect.appendChild(o);
+}}
+timeSelect.disabled=false;
 }
 </script>
 </body>
