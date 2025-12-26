@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Erken Kayıt Randevu Sistemi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb; --primary-dark: #1d4ed8; --primary-soft: #dbeafe;
@@ -13,11 +13,14 @@
             --success-bg: #d1fae5; --success-text:#065f46;
             --error-bg: #fee2e2; --error-text: #991b1b;
             --shadow-soft: 0 10px 30px -5px rgba(37, 99, 235, 0.1), 0 4px 10px -3px rgba(0, 0, 0, 0.05);
+            /* Yeni Renkler */
+            --urgent-red: #dc2626; 
+            --urgent-bg: #fef2f2;
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); background-image: linear-gradient(to bottom right, #f0f5ff, #e0eaff); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: var(--text-dark); }
         .container { background-color: var(--bg-card); padding: 40px; border-radius: 24px; box-shadow: var(--shadow-soft); width: 100%; max-width: 550px; border: 1px solid #ffffff; }
-        .logo { display: block; max-width: 160px; margin: 0 auto 25px; }
-        h2 { font-family: 'Poppins', sans-serif; text-align: center; color: var(--text-dark); margin-bottom: 35px; font-weight: 700; font-size: 1.8rem; }
+        .logo { display: block; max-width: 160px; margin: 0 auto 20px; }
+        h2 { font-family: 'Poppins', sans-serif; text-align: center; color: var(--text-dark); margin-bottom: 20px; font-weight: 700; font-size: 1.8rem; }
         .form-group { margin-bottom: 24px; }
         label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
         input, select { width: 100%; padding: 14px 16px; border: 2px solid var(--border-light); border-radius: 12px; font-size: 15px; box-sizing: border-box; transition: all 0.3s ease; background-color: #f8fafc; color: var(--text-dark); font-family: 'Inter', sans-serif; }
@@ -41,23 +44,75 @@
         #loadingText { font-weight: 500; color: var(--primary); font-size: 0.9em; margin-left: 5px; }
         #roomWarning { font-size: 0.9em; color: var(--error-text); display:none; margin-top: 8px; font-weight: 500; }
         
-        /* Kapalı Gün Uyarısı */
+        /* Özel Kapalı Gün Mesajı Stili */
         #closedDayMessage {
             display: none;
             background-color: #fee2e2;
             color: #991b1b;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             text-align: center;
             margin-bottom: 20px;
             font-weight: 600;
             border: 1px solid #fca5a5;
         }
+
+        /* --- GERİ SAYIM SAYACI STİLLERİ --- */
+        .countdown-wrapper {
+            background-color: #eff6ff; /* Normalde Mavi ton */
+            border: 2px solid var(--primary-soft);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .countdown-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .countdown-timer {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* SON GÜN KIRMIZI MODU */
+        .urgent-mode {
+            background-color: var(--urgent-bg) !important;
+            border-color: var(--urgent-red) !important;
+            animation: pulse-border 2s infinite;
+        }
+        .urgent-mode .countdown-label {
+            color: var(--urgent-red) !important;
+        }
+        .urgent-mode .countdown-timer {
+            color: var(--urgent-red) !important;
+        }
+        
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <img src="https://i.hizliresim.com/6eldhh1.png" alt="Okul Logosu" class="logo">
+        
+        <div id="countdownBox" class="countdown-wrapper">
+            <div id="countdownLabel" class="countdown-label">Erken Kayıt İçin Kalan Süre</div>
+            <div id="countdownTimer" class="countdown-timer">Yükleniyor...</div>
+        </div>
+
         <h2>Erken Kayıt Randevusu</h2>
         
         <form id="appointmentForm">
@@ -96,7 +151,7 @@
                 <input type="date" id="randevuTarihi" name="randevuTarihi" required>
             </div>
             
-            <div id="closedDayMessage"> 28 Aralık Pazar günü randevu sistemimiz kapalıdır.</div>
+            <div id="closedDayMessage">⚠️ 28 Aralık Pazar günü randevu sistemimiz kapalıdır. Lütfen başka bir tarih seçiniz.</div>
 
             <div class="form-group">
                 <label>Görüşme Odası (Salon)</label>
@@ -107,7 +162,7 @@
                     <div class="room-card" id="room-oxford" onclick="selectRoom('Oxford', this)">Oxford</div>
                 </div>
                 <input type="hidden" id="secilenOda" name="secilenOda">
-                <div id="roomWarning">?? Lütfen önce yukarıdan bir tarih seçiniz.</div>
+                <div id="roomWarning">⚠️ Lütfen önce yukarıdan bir tarih seçiniz.</div>
             </div>
             <div class="form-group">
                 <label>Randevu Saati <span id="loadingText"></span></label>
@@ -124,6 +179,51 @@
         // SİZİN URL'NİZ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
+        // --- GERİ SAYIM MANTIĞI ---
+        function startCountdown() {
+            // Hedef: 31 Aralık 2025, Saat 18:00:00
+            // Not: Kodun yıllarca çalışması için '2025' sabit kalmalı, 
+            // ya da dinamik yapmak isterseniz 'new Date().getFullYear()' kullanabilirsiniz.
+            // Sizin sisteminiz 2025 için ayarlı olduğu için 2025 yapıyorum.
+            const targetDate = new Date("Dec 31, 2025 18:00:00").getTime();
+
+            const timerInterval = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+
+                // Zaman hesaplamaları
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // HTML'e yazdır
+                const display = document.getElementById("countdownTimer");
+                const box = document.getElementById("countdownBox");
+                const label = document.getElementById("countdownLabel");
+
+                // Gün 0'dan büyükse GÜN göster, değilse sadece SAAT:DK:SN
+                if (distance > 0) {
+                    display.innerHTML = `${days}g ${hours}s ${minutes}dk ${seconds}sn`;
+                    
+                    // --- SON GÜN KIRMIZI MODU ---
+                    // Eğer gün 0 ise (yani 31 Aralık ise)
+                    if (days < 1) {
+                        box.classList.add("urgent-mode");
+                        label.innerHTML = "🚨 SON GÜN! ACELE EDİN! 🚨";
+                    }
+                } else {
+                    clearInterval(timerInterval);
+                    display.innerHTML = "SÜRE DOLDU";
+                    box.style.opacity = "0.7";
+                    box.classList.remove("urgent-mode");
+                }
+            }, 1000);
+        }
+        // Sayacı Başlat
+        startCountdown();
+        // --------------------------
+
         const dateInput = document.getElementById('randevuTarihi');
         const timeSelect = document.getElementById('randevuSaati');
         const roomInput = document.getElementById('secilenOda');
@@ -132,29 +232,24 @@
         
         let currentBookings = []; 
 
-        // --- TARİH AYARLARI VE GEÇMİŞ TARİH ENGELLEME ---
+        // --- TARİH AYARLARI ---
         const currentYear = new Date().getFullYear();
         const minDate = `${currentYear}-12-01`;
         const maxDate = `${currentYear + 1}-01-01`;
         
-        // Bugünün tarihi (YYYY-MM-DD formatında)
         const today = new Date().toISOString().split('T')[0];
-        
-        // Eğer bugün 1 Aralık'tan sonra ise, başlangıcı bugün yap (Geçmiş seçilemez)
-        // Eğer bugün 1 Aralık'tan önce ise, başlangıcı 1 Aralık yap.
         const startLimit = (today > minDate) ? today : minDate;
 
         dateInput.setAttribute('min', startLimit);
         dateInput.setAttribute('max', maxDate);
-        // ----------------------------------------------------
 
-        // --- ÖZEL KAPALI GÜNLER LİSTESİ ---
+        // --- KAPALI GÜNLER ---
         const closedDates = [
-            '2025-12-07', // Geçmiş Pazar (Opsiyonel, zaten minDate ile engellenebilir)
-            '2025-12-28'  // 21 ARALIK PAZAR KAPALI
+            '2025-12-07', 
+            '2025-12-28'  
         ];
 
-        // --- AÇIK OLAN PAZARLAR LİSTESİ ---
+        // --- AÇIK PAZARLAR ---
         const openSundays = [
             '2025-12-14',
             '2025-12-21'
@@ -163,15 +258,14 @@
         dateInput.addEventListener('change', async function() {
             if (!this.value) return;
             
-            // Sıfırlama
             document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
             roomInput.value = '';
             timeSelect.innerHTML = '<option value="">Lütfen Oda Seçiniz</option>';
             timeSelect.disabled = true;
             document.getElementById('roomWarning').style.display = 'none';
             
-            // --- KAPALI GÜN KONTROLÜ (21 ARALIK) ---
-            if (closedDates.includes(this.value)) {
+            // 7 Aralık Kontrolü
+            if (this.value === '2025-12-07') {
                 closedDayMessage.style.display = 'block'; 
                 roomContainer.style.pointerEvents = 'none'; 
                 roomContainer.style.opacity = '0.5'; 
@@ -183,7 +277,6 @@
                 roomContainer.style.opacity = '1';
             }
             
-            // ODA YÖNETİMİ
             const selectedDate = new Date(this.value);
             const dayOfWeek = selectedDate.getDay(); 
             const dateString = this.value;
@@ -193,38 +286,23 @@
             const roomCambridge = document.getElementById('room-cambridge');
             const roomOxford = document.getElementById('room-oxford');
 
-            // Varsayılan: Hepsi AÇIK
             roomManchester.classList.remove('hidden-room');
             roomLiverpool.classList.remove('hidden-room');
             roomCambridge.classList.remove('hidden-room');
             roomOxford.classList.remove('hidden-room');
 
-            // --- PAZAR GÜNÜ MANTIĞI ---
             if (dayOfWeek === 0) { 
-                // Eğer açık pazar listesindeyse (14 veya 28)
                 if (openSundays.includes(dateString)) {
-                    // Sadece Oxford ve Liverpool açık mı olsun? 
-                    // İsteğiniz: "Pazar günleri oda sayısı 3 olmalı" demiştiniz ama 
-                    // sonra "Sadece 21 Aralık kapalı" dediniz.
-                    // Varsayılan Pazar Kuralını uyguluyoruz: 
-                    // Manchester ve Oxford kapalıydı (Önceki istek), Liverpool ve Cambridge açıktı.
-                    // Veya son istekte Oxford açık denmişti.
-                    
-                    // GÜNCEL PAZAR KURALI: 
-                    // Manchester ve Oxford GİZLİ (3 oda kuralı için birini daha açmalıyız veya Oxford açılmalı)
-                    // Önceki isteğinizde Oxford AÇIK olsun demiştiniz.
-                    // Şöyle yapalım: Manchester GİZLİ, Diğerleri AÇIK (3 Oda)
                     roomManchester.classList.add('hidden-room');
-                    // roomOxford.classList.add('hidden-room'); // Oxford'u açtım
+                    // Oxford AÇIK kalıyor (Varsayılan)
                 } else {
-                    // Listede olmayan Pazar (zaten kapalı gün kontrolü yukarıda yapıldı)
+                    // Diğer pazarlar (Eğer kod akışı buraya gelirse)
                 }
             } 
-            else if (dayOfWeek === 6) { // CUMARTESİ
-                // Hepsi açık
+            else if (dayOfWeek === 6) { 
             } 
-            else { // HAFTA İÇİ
-                roomLiverpool.classList.add('hidden-room'); // Hafta içi Liverpool kapalı
+            else { 
+                roomLiverpool.classList.add('hidden-room'); 
             }
 
             document.getElementById('loadingText').innerHTML = '<div class="loader"></div>Kontrol ediliyor...';
@@ -233,7 +311,7 @@
                 const data = await response.json();
                 if (data.result === 'success') {
                     currentBookings = data.bookings; 
-                    document.getElementById('loadingText').innerHTML = '<span style="color: var(--primary)">? Güncel</span>';
+                    document.getElementById('loadingText').innerHTML = '<span style="color: var(--primary)">✓ Güncel</span>';
                 }
             } catch (error) {
                 console.error(error);
@@ -255,7 +333,6 @@
             generateTimeSlots(roomName, isSunday);
         }
 
-        // --- SAAT MANTIĞI ---
         function generateTimeSlots(selectedRoom, isSunday) {
             timeSelect.innerHTML = '';
             const availableTimes = [];
@@ -267,13 +344,11 @@
                     if (hour === 13 && minute === 0) continue; 
 
                     if (isSunday) {
-                        // Pazar: 10:30 - 16:30
                         if (hour < 10) continue;
                         if (hour === 10 && minute < 30) continue;
                         if (hour === 16 && minute > 0) continue;
                         if (hour > 16) continue;
                     } else {
-                        // Diğer: 09:00 - 17:00
                         if (hour === 17 && minute > 0) continue;
                         if (hour > 17) continue; 
                     }
@@ -308,13 +383,13 @@
             const msg = document.getElementById('statusMessage');
 
             if (!odaSecimi || odaSecimi === "") {
-                msg.innerHTML = '?? Lütfen bir <b>Görüşme Odası</b> seçiniz!';
+                msg.innerHTML = '⚠️ Lütfen bir <b>Görüşme Odası</b> seçiniz!';
                 msg.className = 'error';
                 msg.style.display = 'block';
                 return;
             }
             if (!saatSecimi || saatSecimi === "") {
-                msg.innerHTML = '?? Lütfen bir <b>Randevu Saati</b> seçiniz!';
+                msg.innerHTML = '⚠️ Lütfen bir <b>Randevu Saati</b> seçiniz!';
                 msg.className = 'error';
                 msg.style.display = 'block';
                 return;
@@ -335,12 +410,12 @@
             .then(response => response.json())
             .then(responseData => {
                 if (responseData.result === 'error') {
-                    msg.innerHTML = '?? ' + responseData.message;
+                    msg.innerHTML = '⚠️ ' + responseData.message;
                     msg.className = 'error';
                     msg.style.display = 'block';
                     dateInput.dispatchEvent(new Event('change')); 
                 } else {
-                    msg.innerHTML = '? Kaydınız başarıyla oluşturuldu! Teşekkürler.';
+                    msg.innerHTML = '✅ Kaydınız başarıyla oluşturuldu! Teşekkürler.';
                     msg.className = 'success';
                     msg.style.display = 'block';
                     this.reset();
