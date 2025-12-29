@@ -13,13 +13,12 @@
             --success-bg: #d1fae5; --success-text:#065f46;
             --error-bg: #fee2e2; --error-text: #991b1b;
             --shadow-soft: 0 10px 30px -5px rgba(37, 99, 235, 0.1), 0 4px 10px -3px rgba(0, 0, 0, 0.05);
-            /* Yeni Renkler - Geri Sayım İçin */
             --urgent-red: #dc2626; 
             --urgent-bg: #fef2f2;
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); background-image: linear-gradient(to bottom right, #f0f5ff, #e0eaff); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: var(--text-dark); }
         .container { background-color: var(--bg-card); padding: 40px; border-radius: 24px; box-shadow: var(--shadow-soft); width: 100%; max-width: 550px; border: 1px solid #ffffff; }
-        .logo { display: block; max-width: 160px; margin: 0 auto 25px; }
+        .logo { display: block; max-width: 160px; margin: 0 auto 20px; }
         h2 { font-family: 'Poppins', sans-serif; text-align: center; color: var(--text-dark); margin-bottom: 25px; font-weight: 700; font-size: 1.8rem; }
         .form-group { margin-bottom: 24px; }
         label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
@@ -44,7 +43,6 @@
         #loadingText { font-weight: 500; color: var(--primary); font-size: 0.9em; margin-left: 5px; }
         #roomWarning { font-size: 0.9em; color: var(--error-text); display:none; margin-top: 8px; font-weight: 500; }
         
-        /* Kapalı Gün Uyarısı */
         #closedDayMessage {
             display: none;
             background-color: #fee2e2;
@@ -83,6 +81,18 @@
             font-feature-settings: "tnum";
             font-variant-numeric: tabular-nums;
         }
+        
+        /* Süre Dolduğunda Devreye Girecek Stil */
+        .expired-mode {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+        .expired-mode .countdown-timer {
+            color: #b91c1c !important;
+            font-size: 1.4rem;
+        }
+
         /* Son Gün Kırmızı Modu */
         .urgent-mode {
             background-color: var(--urgent-bg) !important;
@@ -97,6 +107,13 @@
             0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
             100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+        
+        /* Form Devre Dışı Bırakma Stili */
+        .form-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+            filter: grayscale(100%);
         }
     </style>
 </head>
@@ -143,7 +160,7 @@
             </div>
             
             <div class="form-group">
-                <label>Görüşme Tarihi (1 Aralık - 31 Ocak)</label>
+                <label>Görüşme Tarihi (Son Tarih: 31 Aralık)</label>
                 <input type="date" id="randevuTarihi" name="randevuTarihi" required>
             </div>
             
@@ -175,7 +192,7 @@
         // SİZİN URL'NİZ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk64x7hI7AoRAcv-rXDOF3nrcA9JsXM4vQJ6F_QV2ScEbGdN10WVTnfFxP9iBDg1qKcA/exec';
 
-        // --- GERİ SAYIM SAYACI (YENİ EKLENDİ) ---
+        // --- GERİ SAYIM SAYACI ---
         function startCountdown() {
             // Hedef: 31 Aralık 2025, Saat 18:00:00
             const targetDate = new Date("Dec 31, 2025 18:00:00").getTime();
@@ -184,16 +201,18 @@
                 const now = new Date().getTime();
                 const distance = targetDate - now;
 
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
                 const display = document.getElementById("countdownTimer");
                 const box = document.getElementById("countdownBox");
                 const label = document.getElementById("countdownLabel");
+                const form = document.getElementById("appointmentForm");
 
                 if (distance > 0) {
+                    // SÜRE VARSA
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
                     display.innerHTML = `${days}g ${hours}s ${minutes}dk ${seconds}sn`;
                     
                     // Son Gün (31 Aralık) Kırmızı ve Titrek olsun
@@ -202,10 +221,19 @@
                         label.innerHTML = "🚨 SON GÜN! ACELE EDİN! 🚨";
                     }
                 } else {
+                    // SÜRE BİTTİYSE (31 Aralık 18:00'ı geçtiyse)
                     clearInterval(timerInterval);
-                    display.innerHTML = "SÜRE DOLDU";
-                    box.style.opacity = "0.7";
+                    
+                    // Kutuyu güncelle
                     box.classList.remove("urgent-mode");
+                    box.classList.add("expired-mode");
+                    label.innerHTML = "🚫 KAMPANYA SONA ERDİ";
+                    display.innerHTML = "Kayıtlar Kapanmıştır";
+                    
+                    // FORMU KİLİTLE (Artık kimse işlem yapamaz)
+                    form.classList.add("form-disabled");
+                    document.getElementById("submitButton").disabled = true;
+                    document.getElementById("submitButton").textContent = "Süre Doldu";
                 }
             }, 1000);
         }
@@ -222,14 +250,19 @@
 
         const currentYear = new Date().getFullYear();
         const minDate = `${currentYear}-12-01`;
-        const maxDate = `${currentYear + 1}-12-31`;
+        const maxDate = `${currentYear + 1}-12-31`; // 31 ARALIK 2026'ya kadar açık (ama geri sayım 2025'te bitecek)
+        // Not: Geri sayım 2025 için ayarlı, form 2025'te kilitlenecek.
+        // Tarih seçici de en fazla o güne kadar seçebilsin:
+        // Burayı 2025-12-31 olarak güncelliyorum.
+        const absoluteMaxDate = `2025-12-31`;
+
         const today = new Date().toISOString().split('T')[0];
         const startLimit = (today > minDate) ? today : minDate;
 
         dateInput.setAttribute('min', startLimit);
-        dateInput.setAttribute('max', maxDate);
+        dateInput.setAttribute('max', absoluteMaxDate); // MAKSİMUM TARİH AYARLANDI
 
-        // --- KAPALI GÜNLER LİSTESİ (28 ARALIK DAHİL) ---
+        // --- KAPALI GÜNLER LİSTESİ ---
         const closedDates = [
             '2025-12-07', 
             '2025-12-21',
